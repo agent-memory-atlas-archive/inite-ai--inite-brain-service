@@ -250,7 +250,15 @@ export class PredicateRegistryService {
   policyFor(companyId: string, predicate: string): PredicateDefinition {
     const cached = this.cache.get(companyId);
     if (cached) {
-      const hit = cached.snapshot.byId.get(predicate);
+      // policyById (active ∪ proposed) rather than byId (active only).
+      // Reading byId here is what made the whole open-vocabulary half of
+      // a tenant's registry inert: canonicalize inserts a novel
+      // predicate as 'proposed', byId excludes it, so its row's policy —
+      // semantics above all — was written and never read, and every such
+      // fact resolved on DEFAULT_FALLBACK's append_only. Measured on a
+      // live tenant: 143 of 143 `llm_auto` rows were 'proposed'.
+      // Falls back to byId for legacy snapshot literals without the map.
+      const hit = (cached.snapshot.policyById ?? cached.snapshot.byId).get(predicate);
       if (hit) return hit;
     }
     // Fallback: CORE seed table by predicate id. Covers the case where the
@@ -479,6 +487,17 @@ export class PredicateRegistryService {
       }));
       const active = all.filter(({ def }) => def.status === 'active').map(({ def }) => def);
       const byId = new Map(active.map((p) => [p.predicateId, p]));
+      // Write-path policy lookup: proposed rows FIRST so an active row
+      // of the same id always wins the overwrite. See PredicateSnapshot
+      // .policyById — without it a proposed predicate's own policy was
+      // unreachable and every open-vocabulary fact resolved on
+      // DEFAULT_FALLBACK.
+      const policyById = new Map(
+        all
+          .filter(({ def }) => def.status === 'proposed')
+          .map(({ def }) => [def.predicateId, def] as const),
+      );
+      for (const [id, def] of byId) policyById.set(id, def);
 
       // Build aliasMap: for each row, follow aliasedTo chains until we
       // land on an active predicate (or give up). Length-capped to defend
@@ -552,6 +571,7 @@ export class PredicateRegistryService {
         versionHash,
         active,
         byId,
+        policyById,
         aliasMap,
         embeddings,
         extractionProfiles,

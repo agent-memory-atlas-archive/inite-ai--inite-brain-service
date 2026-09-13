@@ -114,6 +114,8 @@ Answer exactly one question: when the subject gets a NEW value for this predicat
 
 Judge the predicate, not the one example: "purchased_item" is append_only even though someone can buy the same thing twice, and "office_address" is single_active even if the example shows only one address.
 
+A predicate that names a RELATION between two things — the value is another entity, not a value the subject holds — is "append_only" even when it sounds like a replacement: "replaces", "superseded_by", "alternative_to", "depends_on", "calls", "owns". A second such statement is a second edge in the graph, not a correction of the first, and retiring the first would delete a relationship that is still true.
+
 When the two readings are genuinely equally plausible, answer "append_only". Wrongly marking a multi-valued predicate single_active silently retires facts that should coexist; the reverse only leaves a disagreement standing for a later pass to adjudicate.
 
 Output strictly the JSON shape requested. No preamble.`;
