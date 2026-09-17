@@ -847,7 +847,7 @@ export const CONFIG_CATALOG: ConfigCatalogSpec[] = [
     runtimeMutable: true,
     isBooleanFlag: true,
     description:
-      'Belief promotion field fold (#135 seam 2): deterministically fold an enricher-re-coined field name onto an existing one for the same (userId, subject) — token-set subset whose extra tokens are all generic modifiers (ownership/status/state/current/of/the); the EXISTING name wins, and more than one match folds nothing and warns loudly (skip loudly, never flip-flop). NO embeddings, NO LLM. Also absorbs orphans: after each canonical upsert, ACTIVE beliefs of the same (userId, subject) stored under a foldable VARIANT of the canonical field (earlier-batch leftovers the incoming-name fold can never retire) are stamped superseded so they stop serving stale values; the canonical belief keeps its own value, the orphan value backfills priorValue only when the canonical has none, and more than one distinct variant field skips loudly. Off = exact-string (subject, field) grouping and zero extra queries — byte-identical fold output.',
+      'Belief promotion slot resolution (0147): resolve each enricher-written field name through the SAME predicate registry the fact plane uses, and group beliefs on the resulting slot rather than on the free-text name. A belief then carries predicateId/predicateAlias and its identity is `(predicateAlias ?? predicateId)` — the same expression a fact resolves through — so one vocabulary serves both planes, PredicateConsolidationService folds both, and the BELIEFS_FACT_DAMPING join becomes id-to-id. It also keeps ONE active row per slot: a second one (a belief written under a different name for the same attribute) is stamped superseded into the head, which keeps its own value, and donates priorValue only when the head records none. REPLACED a lexical token-subset rule over a hand-written six-word stoplist of generic modifiers, which on a live tenant folded 0 of its 12 field names and missed all three pairs it existed to catch. Off = exact-string (subject, field) grouping and no registry calls — the pre-0147 behaviour, under which a belief simply has no cross-plane identity.',
   },
   {
     key: 'SCENES_VALUE_GATE_ENABLED',
@@ -3268,6 +3268,25 @@ export const CONFIG_CATALOG: ConfigCatalogSpec[] = [
     isBooleanFlag: false,
     description:
       'Max concurrent predicate-cardinality judge calls (PREDICATE_SEMANTICS_MODEL). The calls sit on the ingest write path, so this bounds how much a cold tenant — which coins most of its vocabulary in the first few documents — can fan out.',
+  },
+  {
+    key: 'PREDICATE_IDENTITY_MODEL',
+    category: 'registry',
+    // Captured in the judge's constructor — a live flip needs a restart.
+    defaultValue: null,
+    runtimeMutable: false,
+    isBooleanFlag: false,
+    description:
+      'Model for the predicate IDENTITY judge, used by the consolidation pass (POST /v1/admin/predicates/consolidate) to decide whether two names in a tenant\u2019s vocabulary denote the same attribute. Empty (default) = OPENAI_CHAT_MODEL, else gpt-4o-mini.',
+  },
+  {
+    key: 'PREDICATE_IDENTITY_CONCURRENCY',
+    category: 'registry',
+    defaultValue: '4',
+    runtimeMutable: false,
+    isBooleanFlag: false,
+    description:
+      'Max concurrent predicate-identity judge calls. These run inside the consolidation PASS (POST /v1/admin/predicates/consolidate), never on the ingest write path \u2014 one call per coined predicate whose blocking set is non-empty.',
   },
   // ── Registry mirroring (pull-only, migration 0064) ───────
   {
