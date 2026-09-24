@@ -88,6 +88,9 @@ export class MentionIngestService {
       // is built later by the window deriver + segment composer over L0.
       // LLM-free archive ingestion; requires the substrate flag to be on
       // to be useful.
+      // The captured turn rides every answer: a conversation-shaped source
+      // (mail, chat) links its catalogue row to it.
+      const captured = episodeId ? { episodeId } : {};
       if (envFlagEnabled(process.env.INGEST_EPISODE_ONLY)) {
         this.metrics?.countIngestMention('skipped');
         return {
@@ -95,6 +98,7 @@ export class MentionIngestService {
           reason: 'episode_only',
           extractedEntityIds: [],
           extractedFactIds: [],
+          ...captured,
         };
       }
 
@@ -106,6 +110,7 @@ export class MentionIngestService {
           reason: prep.skip,
           extractedEntityIds: [],
           extractedFactIds: [],
+          ...captured,
         };
       }
 
@@ -152,7 +157,7 @@ export class MentionIngestService {
       }
 
       this.metrics?.countIngestMention('extracted');
-      return { skipped: false, ...out };
+      return { skipped: false, ...out, ...captured };
     });
   }
 

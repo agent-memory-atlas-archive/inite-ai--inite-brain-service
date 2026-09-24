@@ -112,6 +112,47 @@ import {
   TrustScopeRowSchema,
 } from '../src/contracts/sources/sources.schema';
 import {
+  CreateSourceConnectionRequestSchema,
+  SourceConnectionSchema,
+  SourceConnectionsListResponseSchema,
+  SourceCatalogResponseSchema,
+  SourceItemSchema,
+  SourceItemsListResponseSchema,
+  SourceSyncSummarySchema,
+  SyncNowRequestSchema,
+  SyncNowResponseSchema,
+  SourceConnectionStatsSchema,
+  SourceRunsResponseSchema,
+  SourceItemInspectResponseSchema,
+  SourceAgentsResponseSchema,
+  BrowseResponseSchema,
+  SourceOAuthStartRequestSchema,
+  SourceOAuthStartResponseSchema,
+  SourceOAuthMcpStartRequestSchema,
+  SourceOAuthMcpStartResponseSchema,
+  SourceOAuthGrantsResponseSchema,
+  RevokeGrantResponseSchema,
+  PushRecordsRequestSchema,
+  PushRecordsResponseSchema,
+  RecordsPreviewRequestSchema,
+  MappingAssistRequestSchema,
+  MappingAssistResponseSchema,
+  RecordsPreviewResponseSchema,
+  WebhookSetupRequestSchema,
+  WebhookSetupResponseSchema,
+  WebhookReceiptSchema,
+  AgentInventorySchema,
+  AgentConnectionsListResponseSchema,
+  AgentDeltasRequestSchema,
+  AgentDeltasResponseSchema,
+  AgentItemResponseSchema,
+  BeginAgentRunRequestSchema,
+  BeginAgentRunResponseSchema,
+  FetchedItemWireSchema,
+  FinishAgentRunRequestSchema,
+  UpdateSourceConnectionRequestSchema,
+} from '../src/contracts/source-plane/source-plane.schema';
+import {
   ClaimWorkResponseSchema,
   FailWorkResponseSchema,
   HeartbeatWorkResponseSchema,
@@ -335,6 +376,46 @@ const ZOD_COMPONENTS: Record<string, z.ZodType> = {
   PublicSourcesListResponse: PublicSourcesListResponseSchema,
   SourceHistoryRow: SourceHistoryRowSchema,
   TrustScopeRow: TrustScopeRowSchema,
+  // --- source plane operator surface (src/contracts/source-plane/…)
+  SourceConnection: SourceConnectionSchema,
+  SourceConnectionsListResponse: SourceConnectionsListResponseSchema,
+  SourceCatalogResponse: SourceCatalogResponseSchema,
+  CreateSourceConnectionRequest: CreateSourceConnectionRequestSchema,
+  UpdateSourceConnectionRequest: UpdateSourceConnectionRequestSchema,
+  SourceItem: SourceItemSchema,
+  SourceItemsListResponse: SourceItemsListResponseSchema,
+  SourceSyncSummary: SourceSyncSummarySchema,
+  SyncNowRequest: SyncNowRequestSchema,
+  SyncNowResponse: SyncNowResponseSchema,
+  SourceConnectionStats: SourceConnectionStatsSchema,
+  SourceRunsResponse: SourceRunsResponseSchema,
+  SourceItemInspectResponse: SourceItemInspectResponseSchema,
+  SourceAgentsResponse: SourceAgentsResponseSchema,
+  BrowseResponse: BrowseResponseSchema,
+  SourceOAuthStartRequest: SourceOAuthStartRequestSchema,
+  SourceOAuthStartResponse: SourceOAuthStartResponseSchema,
+  SourceOAuthMcpStartRequest: SourceOAuthMcpStartRequestSchema,
+  SourceOAuthMcpStartResponse: SourceOAuthMcpStartResponseSchema,
+  SourceOAuthGrantsResponse: SourceOAuthGrantsResponseSchema,
+  RevokeGrantResponse: RevokeGrantResponseSchema,
+  PushRecordsRequest: PushRecordsRequestSchema,
+  PushRecordsResponse: PushRecordsResponseSchema,
+  RecordsPreviewRequest: RecordsPreviewRequestSchema,
+  RecordsPreviewResponse: RecordsPreviewResponseSchema,
+  MappingAssistRequest: MappingAssistRequestSchema,
+  MappingAssistResponse: MappingAssistResponseSchema,
+  WebhookSetupRequest: WebhookSetupRequestSchema,
+  WebhookSetupResponse: WebhookSetupResponseSchema,
+  WebhookReceipt: WebhookReceiptSchema,
+  AgentInventory: AgentInventorySchema,
+  AgentConnectionsListResponse: AgentConnectionsListResponseSchema,
+  AgentDeltasRequest: AgentDeltasRequestSchema,
+  AgentDeltasResponse: AgentDeltasResponseSchema,
+  AgentItemResponse: AgentItemResponseSchema,
+  BeginAgentRunRequest: BeginAgentRunRequestSchema,
+  BeginAgentRunResponse: BeginAgentRunResponseSchema,
+  FetchedItemWire: FetchedItemWireSchema,
+  FinishAgentRunRequest: FinishAgentRunRequestSchema,
   // --- external-indexer work discovery (src/contracts/indexer/…)
   ClaimWorkResponse: ClaimWorkResponseSchema,
   FailWorkRequest: FailWorkRequestSchema,
@@ -1507,6 +1588,753 @@ function sourcesPaths(): Json {
           '200': jsonResponse('The source reputation detail.', ref('PublicSourceDetailResponse')),
           ...AUTH_ERRORS,
           '404': errorRef('NotFound'),
+        },
+      }),
+    },
+  };
+}
+
+const SOURCE_PLANE_NOTE =
+  'Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — ' +
+  'answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.';
+
+function sourcePlanePaths(): Json {
+  const idParam = pathParam(
+    'id',
+    'Connection id (`source_connection:<tail>`; the bare tail is accepted).',
+  );
+  return {
+    '/v1/admin/source-connections': {
+      get: operation({
+        operationId: 'listSourceConnections',
+        tag: 'Source Plane',
+        summary: 'List this tenant’s source connections',
+        description:
+          'Every connection the tenant has created for a pack’s declared ' +
+          '`sources` entry, newest first, with its schedule, policies, ' +
+          'checkpoint and last-sync bookkeeping. Credentials are never ' +
+          'serialised — only `hasCredential`. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        responses: {
+          '200': jsonResponse('The connections.', ref('SourceConnectionsListResponse')),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+      post: operation({
+        operationId: 'createSourceConnection',
+        tag: 'Source Plane',
+        summary: 'Connect a pack’s declared source',
+        description:
+          'Instantiates one `sources[]` entry of an installed (and ' +
+          'consented — `acceptSources`) or builtin pack: a `native` entry ' +
+          'must name a connector this brain ships, `mcp` is harvested by ' +
+          'brain, `external` is a catalogue the publisher fills. The ' +
+          'connection becomes a `source_registry` recorder ' +
+          '(`vertical:recorder`) so per-connection trust is learned; ' +
+          '`ownerUserId` makes it personal (every row it writes is ' +
+          'user-fenced). Defaults for schedule / policies come from the ' +
+          'entry. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        requestBody: jsonBody(ref('CreateSourceConnectionRequest')),
+        responses: {
+          '201': jsonResponse('Created.', ref('SourceConnection')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/catalog': {
+      get: operation({
+        operationId: 'listSourceCatalog',
+        tag: 'Source Plane',
+        summary: 'What this tenant can connect here',
+        description:
+          'The connectable catalogue: every `sources[]` entry of every pack ' +
+          'the tenant has (builtin and installed, with its consent state), ' +
+          'each with an `availability` — `ready`, `disabled` (the ' +
+          'connector’s SOURCE_KIND switch is off), `missing` (this build ' +
+          'ships no such connector), `agent` (stdio MCP, local-agent host) ' +
+          'or `external` (the publisher pushes) — and the connector’s ' +
+          'static `configExample` / `credentialHint`; plus the shipped ' +
+          'connectors with their switches and the two operator fences ' +
+          '(`fsRoots`, `egressAllowPrivate`). Read-only; never runs a ' +
+          'connector, never reveals a credential. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        responses: {
+          '200': jsonResponse('The catalogue.', ref('SourceCatalogResponse')),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/{id}': {
+      get: operation({
+        operationId: 'getSourceConnection',
+        tag: 'Source Plane',
+        summary: 'One source connection',
+        description: 'The connection as listed. ' + SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [idParam],
+        responses: {
+          '200': jsonResponse('The connection.', ref('SourceConnection')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+      patch: operation({
+        operationId: 'updateSourceConnection',
+        tag: 'Source Plane',
+        summary: 'Change a connection’s label, config, credential, schedule, policies or status',
+        description:
+          'Partial update; `null` clears an optional field. `status` takes ' +
+          '`active` | `paused` — a paused connection is skipped by the ' +
+          'scheduler and by sync-now. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [idParam],
+        requestBody: jsonBody(ref('UpdateSourceConnectionRequest')),
+        responses: {
+          '200': jsonResponse('Updated.', ref('SourceConnection')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+      delete: operation({
+        operationId: 'deleteSourceConnection',
+        tag: 'Source Plane',
+        summary: 'Disconnect a source',
+        description:
+          'Deletes the connection and its catalogue rows. The documents, ' +
+          'assets and facts they produced STAY (the facts-survive ' +
+          'philosophy of pack uninstall): `deletePolicy` governs a source ' +
+          'deleting an item, not an operator disconnecting a source. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [idParam],
+        responses: {
+          '200': jsonResponse('Deleted.', {
+            type: 'object',
+            properties: {
+              deleted: { type: 'boolean', const: true },
+              items: { type: 'integer', description: 'Catalogue rows removed.' },
+            },
+            required: ['deleted', 'items'],
+          }),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/{id}/items': {
+      get: operation({
+        operationId: 'listSourceItems',
+        tag: 'Source Plane',
+        summary: 'The connection’s catalogue',
+        description:
+          'One row per external item the connection has seen — identity by ' +
+          'location (`externalId`), the revision last enumerated vs the ' +
+          'one the stored content was fetched at, the document / asset / ' +
+          'episode it produced, and its state (`seen` | `fetched` | ' +
+          '`indexed` | `gone`). ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [
+          idParam,
+          queryParam('state', 'Only items in this state.', {
+            type: 'string',
+            enum: ['seen', 'fetched', 'indexed', 'gone'],
+          }),
+          queryParam('limit', 'Page size (default 50, max 500).', { type: 'integer' }),
+          queryParam('offset', 'Page offset.', { type: 'integer' }),
+        ],
+        responses: {
+          '200': jsonResponse('The catalogue page.', ref('SourceItemsListResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/{id}/sync': {
+      post: operation({
+        operationId: 'syncSourceConnection',
+        tag: 'Source Plane',
+        summary: 'Sync now',
+        description:
+          'Runs the engine over the connection: enumerate from the ' +
+          'checkpoint (`full: true` re-walks everything and marks what is ' +
+          'missing gone), diff against the catalogue, fetch every changed ' +
+          'item by `contentPolicy` through the door for its shape, stamp ' +
+          'the revision for the drift sweep, apply `deletePolicy` to what ' +
+          'is gone. Default enqueues a `source_sync` job and returns its ' +
+          'run id; `inline: true` runs it in the request and returns the ' +
+          'summary. A re-run over an unchanged source is 0 fetches. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [idParam],
+        requestBody: jsonBody(ref('SyncNowRequest')),
+        responses: {
+          '201': jsonResponse('Enqueued, or the inline summary.', ref('SyncNowResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    ...inspectPaths(idParam),
+    ...oauthPaths(),
+    ...recordsPaths(idParam),
+    ...agentProtocolPaths(idParam),
+  };
+}
+
+const RECORDS_NOTE =
+  'Records (docs/roadmap/crm-sources-2026-09.md): a CRM row enters as FACTS — its mapped ' +
+  'attributes become deterministic candidates under the record’s own id, never prose a model ' +
+  're-extracts. ' +
+  SOURCE_PLANE_NOTE;
+
+/** The records door's two wires: push (brain:write) and the admin preview. */
+function recordsPaths(idParam: Json): Json {
+  return {
+    '/v1/source-connections/{id}/records': {
+      post: operation({
+        operationId: 'pushSourceRecords',
+        tag: 'Source Plane',
+        summary: 'Push record envelopes to a connection',
+        description:
+          'A CRM’s outbound webhook, an automation (Make, n8n, Zapier, Albato) or a script posts a ' +
+          'batch of records — `{ entityType, externalId, name, attributes, relations?, updatedAt? }` — ' +
+          'plus the `<type>/<id>`s that are gone, under a connection of shape `structure`. Each batch ' +
+          'is a `source_sync` run; an unchanged revision is not re-ingested; gone ids close their ' +
+          'facts by the connection’s delete policy. ' +
+          RECORDS_NOTE,
+        scope: 'brain:write',
+        parameters: [idParam],
+        requestBody: jsonBody(ref('PushRecordsRequest')),
+        responses: {
+          '201': jsonResponse('The batch’s outcome.', ref('PushRecordsResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/preview': {
+      post: operation({
+        operationId: 'previewSourceRecords',
+        tag: 'Source Plane',
+        summary: 'Preview a records connector before connecting',
+        description:
+          'With the config and credential about to be connected, list one page per chosen entity at ' +
+          'the live vendor and show what the mapping makes of the first records — the facts, the ' +
+          'relations, the fields left unmapped, the drops by name. Nothing is written. ' +
+          RECORDS_NOTE,
+        scope: 'brain:admin',
+        requestBody: jsonBody(ref('RecordsPreviewRequest')),
+        responses: {
+          '201': jsonResponse('The preview.', ref('RecordsPreviewResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/assist': {
+      post: operation({
+        operationId: 'assistSourceMapping',
+        tag: 'Source Plane',
+        summary: 'Propose a rest_records config from an OpenAPI document or sample answers',
+        description:
+          'The mapping assistant for a backend with no connector of its own: from an OpenAPI 3.x ' +
+          'document (fetched through the egress guard, or pasted as JSON / YAML) and / or sample list ' +
+          'answers, propose the `rest_records` endpoints — the entity types, where the rows sit, the ' +
+          'paging style, the updated-since parameter, the id / name / updated-at fields, the relation ' +
+          'fields — and the field → predicate mapping over the pack vocabulary, each entity with a ' +
+          'reason and a confidence. Deterministic heuristics always; under `SOURCE_MAPPING_ASSISTANT` ' +
+          'one bounded model call refines them (validated, never trusted). Nothing is written; the ' +
+          'preview verifies the proposal by execution. ' +
+          RECORDS_NOTE,
+        scope: 'brain:admin',
+        requestBody: jsonBody(ref('MappingAssistRequest')),
+        responses: {
+          '201': jsonResponse('The proposal.', ref('MappingAssistResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/{id}/webhook': {
+      post: operation({
+        operationId: 'setupSourceWebhook',
+        tag: 'Source Plane',
+        summary: 'Switch a connection’s inbound webhook on',
+        description:
+          'Freshness for the records connectors (docs/roadmap/crm-sources-2026-09.md § 4.4): the ' +
+          'address to register at the vendor (the tenant and the connection under an HMAC), the ' +
+          'secret shown once (generated, or the vendor’s own — a Bitrix24 application token, a ' +
+          'HubSpot app’s client secret), and the vendor’s how-to. Calling it again rotates the ' +
+          'secret. Needs `SOURCE_WEBHOOKS=1` and `SOURCE_CREDENTIAL_ENCRYPTION_KEY`. ' +
+          RECORDS_NOTE,
+        scope: 'brain:admin',
+        parameters: [idParam],
+        requestBody: jsonBody(ref('WebhookSetupRequest')),
+        responses: {
+          '201': jsonResponse('The address, the secret (once) and the notes.', ref('WebhookSetupResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+      delete: operation({
+        operationId: 'disableSourceWebhook',
+        tag: 'Source Plane',
+        summary: 'Switch a connection’s inbound webhook off',
+        description:
+          'Forgets the secret; the public address answers 404 from here on. ' + RECORDS_NOTE,
+        scope: 'brain:admin',
+        parameters: [idParam],
+        responses: {
+          '200': jsonResponse('Off.', { type: 'object', properties: { ok: { type: 'boolean' } } }),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/source-connections/webhook/{address}': {
+      post: {
+        operationId: 'receiveSourceWebhook',
+        tags: ['Source Plane'],
+        // Unauthenticated: the signed address names the connection, the vendor's signature or the secret authenticates.
+        security: [],
+        summary: 'The vendor’s call (public)',
+        description:
+          'Where a CRM calls on change — the address the setup call handed out. Public by ' +
+          'construction: the HMAC-signed address names the tenant and the connection, and the ' +
+          'call is trusted the vendor’s way (HubSpot v3 signature, Pipedrive basic auth, Bitrix24 ' +
+          '`auth[application_token]`, Kommo / custom `?token=` or `X-Brain-Signature`). The ' +
+          'events name entity + id (+ deleted); the engine fetches those records through the ' +
+          'records door as a queued `source_sync` job (202) — or inline without a queue (200, ' +
+          'summary). The webhook never carries data into memory. 404 for an unknown address or ' +
+          'a connection whose webhook is off; 401 for a call the scheme rejects. ' +
+          RECORDS_NOTE,
+        parameters: [pathParam('address', 'The signed address from the setup call.')],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { type: 'object', additionalProperties: true } },
+            'application/x-www-form-urlencoded': {
+              schema: { type: 'object', additionalProperties: true },
+            },
+          },
+        },
+        responses: {
+          '200': jsonResponse('Applied inline.', ref('WebhookReceipt')),
+          '202': jsonResponse('Queued.', ref('WebhookReceipt')),
+          '401': errorRef('Unauthorized'),
+          '404': errorRef('NotFound'),
+        },
+      },
+    },
+  };
+}
+
+const OAUTH_NOTE =
+  'Connected accounts (docs/source-plane.md § Connected accounts): the brain as an ' +
+  'outbound OAuth 2.1 client for the cloud connectors (gdrive, onedrive, dropbox). ' +
+  'Answers a bare 404 until `SOURCE_PLANE_ENABLED=1` and `SOURCE_OAUTH_CLIENT=1`; ' +
+  'needs `SOURCE_CREDENTIAL_ENCRYPTION_KEY` — tokens are never stored in the clear.';
+
+/** Connected accounts — the admin half and the provider's public return leg. */
+function oauthPaths(): Json {
+  return {
+    '/v1/admin/source-connections/oauth/start': {
+      post: operation({
+        operationId: 'startSourceOAuth',
+        tag: 'Source Plane',
+        summary: 'Begin connecting an account',
+        description:
+          'For a connector that runs as a connected account: the provider’s consent URL ' +
+          '(authorization code + PKCE, the connector’s scopes, a signed `state`) to open ' +
+          'in a popup. The provider returns the browser to the public callback, which ' +
+          'keeps the grant and posts `{ type: "brain-source-oauth", grantId, account }` ' +
+          'to the `origin` named here. ' +
+          OAUTH_NOTE,
+        scope: 'brain:admin',
+        requestBody: jsonBody(ref('SourceOAuthStartRequest')),
+        responses: {
+          '200': jsonResponse('Where to send the browser.', ref('SourceOAuthStartResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/oauth/mcp/start': {
+      post: operation({
+        operationId: 'startSourceMcpOAuth',
+        tag: 'Source Plane',
+        summary: 'Sign in at an MCP server (discovered authorization server)',
+        description:
+          'The brain as an OAuth client of any MCP server (W4.3): the server’s authorization server ' +
+          'is discovered from its 401 (RFC 9728 protected-resource metadata → RFC 8414 / OpenID ' +
+          'metadata), a client is registered there dynamically (RFC 7591) unless one the operator ' +
+          'registered is passed, and the admin is sent to consent with PKCE and the RFC 8707 ' +
+          '`resource`. The callback keeps a `mcp` grant for that resource; a pack’s `auth: oauth` ' +
+          'MCP source then runs as it. 404 until `SOURCE_MCP_OAUTH=1`. ' +
+          OAUTH_NOTE,
+        scope: 'brain:admin',
+        requestBody: jsonBody(ref('SourceOAuthMcpStartRequest')),
+        responses: {
+          '201': jsonResponse('The consent URL, the state and the resource.', ref('SourceOAuthMcpStartResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/oauth/grants': {
+      get: operation({
+        operationId: 'listSourceOAuthGrants',
+        tag: 'Source Plane',
+        summary: 'The accounts connected, and the providers this deployment can connect',
+        description:
+          'Every grant (provider, account label, scopes, status, whether it can refresh ' +
+          'itself, when its access token expires) — never a token — plus each provider’s ' +
+          'readiness (an app registered or not) and the redirect URI to register. ' +
+          OAUTH_NOTE,
+        scope: 'brain:admin',
+        responses: {
+          '200': jsonResponse('The grants.', ref('SourceOAuthGrantsResponse')),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/oauth/grants/{id}': {
+      delete: operation({
+        operationId: 'revokeSourceOAuthGrant',
+        tag: 'Source Plane',
+        summary: 'Disconnect an account',
+        description:
+          'Revokes the token at the provider (best effort; `providerRevoked` says whether ' +
+          'it accepted) and marks the grant revoked. Connections that run as it fail their ' +
+          'next sync by name until reconnected. ' +
+          OAUTH_NOTE,
+        scope: 'brain:admin',
+        parameters: [pathParam('id', 'The grant id (`source_oauth_grant:<id>`, prefix optional).')],
+        responses: {
+          '200': jsonResponse('Disconnected.', ref('RevokeGrantResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/source-connections/oauth/callback': {
+      get: {
+        operationId: 'sourceOAuthCallback',
+        tags: ['Source Plane'],
+        // Unauthenticated: the signed state is the credential.
+        security: [],
+        summary: 'The provider’s return leg (public)',
+        description:
+          'Where a provider sends the browser after consent — the app’s registered redirect ' +
+          'URI. Public by construction: the HMAC-signed `state` authenticates the request. ' +
+          'Exchanges the code, keeps the grant, and answers a small HTML page that hands the ' +
+          'result to the admin window that opened it and closes. No token, code or state ' +
+          'appears in the page. ' +
+          OAUTH_NOTE,
+        parameters: [
+          queryParam('state', 'The signed state the start call issued.', { type: 'string' }),
+          queryParam('code', 'The authorization code.', { type: 'string' }),
+          queryParam('error', 'The provider’s error, when consent failed.', { type: 'string' }),
+          queryParam('error_description', 'The provider’s error text.', { type: 'string' }),
+        ],
+        responses: {
+          '200': {
+            description: 'The result page.',
+            content: { 'text/html': { schema: { type: 'string' } } },
+          },
+          '404': errorRef('NotFound'),
+        },
+      },
+    },
+  };
+}
+
+/** The operator's read-only drill-down (docs/source-plane.md § Admin UI). */
+function inspectPaths(idParam: Json): Json {
+  return {
+    '/v1/admin/source-connections/agents': {
+      get: operation({
+        operationId: 'listSourceAgents',
+        tag: 'Source Plane',
+        summary: 'The local agents this tenant has heard from',
+        description:
+          'Every agent that checked in: when, from which host and version, and the ' +
+          'folders it reported under its roots (names only) — the folder picker for ' +
+          'agent-host connections. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        responses: {
+          '200': jsonResponse('The agents.', ref('SourceAgentsResponse')),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/browse': {
+      get: operation({
+        operationId: 'browseSourceFolders',
+        tag: 'Source Plane',
+        summary: 'One level of the brain host’s disk, inside SOURCE_FS_ROOTS',
+        description:
+          'The folder picker for server-host connections: without `path`, the jail roots; ' +
+          'with one, its subfolders (hidden, VCS and build directories left out, symlinks ' +
+          'never followed) and a count of files. A path outside the jail, or any path ' +
+          'when no jail is set, is refused. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [
+          queryParam('path', 'The directory to list; empty = the jail roots.', { type: 'string' }),
+        ],
+        responses: {
+          '200': jsonResponse('The level.', ref('BrowseResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/{id}/stats': {
+      get: operation({
+        operationId: 'getSourceConnectionStats',
+        tag: 'Source Plane',
+        summary: 'What the connection produced',
+        description:
+          'Catalogue rows by state and the facts the connection grounds ' +
+          '(active / stale per the drift sweep / closed by the delete ' +
+          'policy). The fact count is a bounded scan; `facts` is null when ' +
+          'the tenant was too large to count in time. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [idParam],
+        responses: {
+          '200': jsonResponse('The counts.', ref('SourceConnectionStats')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/{id}/runs': {
+      get: operation({
+        operationId: 'listSourceConnectionRuns',
+        tag: 'Source Plane',
+        summary: 'The connection’s runs',
+        description:
+          'Every sync of the connection, newest first — queued, inline and ' +
+          'agent runs alike, each a `source_sync` job_run projected to who ' +
+          'ran it, its mode, counters, duration and error. `persisted: ' +
+          'false` when JOB_RUN_PERSIST is off. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [
+          idParam,
+          queryParam('limit', 'Page size (default 20, max 200).', { type: 'integer' }),
+        ],
+        responses: {
+          '200': jsonResponse('The runs.', ref('SourceRunsResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/admin/source-connections/{id}/items/{itemId}': {
+      get: operation({
+        operationId: 'inspectSourceItem',
+        tag: 'Source Plane',
+        summary: 'One catalogue row, followed to its facts',
+        description:
+          'The item, the document it became (or the asset it was stored as ' +
+          'and the parts the bridge made of it), the representations the ' +
+          'processors extracted, and the facts that cite it with the ' +
+          'revision each was read at, its stale mark and its close. ' +
+          SOURCE_PLANE_NOTE,
+        scope: 'brain:admin',
+        parameters: [idParam, pathParam('itemId', 'The catalogue row id (`source_item:…`).')],
+        responses: {
+          '200': jsonResponse('The item and what it grounds.', ref('SourceItemInspectResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+  };
+}
+
+const AGENT_NOTE =
+  'The local agent’s wire (docs/source-plane.md § Agent): the connector runs ' +
+  'on the agent’s machine, the engine keeps the books here. Scope ' +
+  'brain:write — a tenant write key, never an admin one; it reaches only ' +
+  'the connections an operator pointed at its host (`host: agent:<id>`). ' +
+  SOURCE_PLANE_NOTE;
+
+function agentProtocolPaths(idParam: Json): Json {
+  const runParam = pathParam('runId', 'The run id `begin` returned (a `source_sync` job_run).');
+  return {
+    '/v1/source-connections/agents/{agentId}': {
+      put: operation({
+        operationId: 'agentCheckIn',
+        tag: 'Source Plane',
+        summary: 'Agent check-in: presence and the folders it can see',
+        description:
+          'Sent by the agent on every pass: its version, hostname, platform and the ' +
+          'directories under its roots (names only, depth-bounded). Presence for the ' +
+          'operator, an inventory for the folder picker. ' +
+          AGENT_NOTE,
+        scope: 'brain:write',
+        parameters: [pathParam('agentId', 'The agent id (`agent:<id>` without the prefix).')],
+        requestBody: jsonBody(ref('AgentInventory')),
+        responses: {
+          '200': jsonResponse('Recorded.', {
+            type: 'object',
+            properties: { ok: { type: 'boolean' } },
+          }),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+        },
+      }),
+    },
+    '/v1/source-connections': {
+      get: operation({
+        operationId: 'listAgentSourceConnections',
+        tag: 'Source Plane',
+        summary: 'The connections pointed at this agent host',
+        description:
+          'Every connection whose `host` is the given `agent:<id>`, each with the ' +
+          'pack’s `sources[]` entry it instantiates (the connector kind, a stdio ' +
+          'command, …) so the agent knows what to run. ' +
+          AGENT_NOTE,
+        scope: 'brain:write',
+        parameters: [queryParam('host', 'Required — `agent:<id>`.', { type: 'string' })],
+        responses: {
+          '200': jsonResponse('The agent’s connections.', ref('AgentConnectionsListResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+        },
+      }),
+    },
+    '/v1/source-connections/{id}/agent-runs': {
+      post: operation({
+        operationId: 'beginAgentRun',
+        tag: 'Source Plane',
+        summary: 'Begin an agent run',
+        description:
+          'Opens one run (a `source_sync` job_run, actor `agent:<id>`) and answers ' +
+          'with whether the walk must be full (first run, or requested), the ' +
+          'checkpoint to resume from, the content policy and the fetch budget. ' +
+          'One running agent run per connection — a second begin is 409. ' +
+          AGENT_NOTE,
+        scope: 'brain:write',
+        parameters: [idParam],
+        requestBody: jsonBody(ref('BeginAgentRunRequest')),
+        responses: {
+          '201': jsonResponse('The run.', ref('BeginAgentRunResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+          '409': errorRef('Conflict'),
+        },
+      }),
+    },
+    '/v1/source-connections/{id}/agent-runs/{runId}/deltas': {
+      post: operation({
+        operationId: 'postAgentRunDeltas',
+        tag: 'Source Plane',
+        summary: 'A batch of catalogue deltas',
+        description:
+          'Up to 1000 `upsert` / `gone` / `checkpoint` deltas from the agent’s walk, ' +
+          'applied to the catalogue exactly as a server walk would be. The answer ' +
+          'names the items whose revision moved — the ones the agent must now ' +
+          'fetch and post. ' +
+          AGENT_NOTE,
+        scope: 'brain:write',
+        parameters: [idParam, runParam],
+        requestBody: jsonBody(ref('AgentDeltasRequest')),
+        responses: {
+          '201': jsonResponse(
+            'What to fetch, and the batch’s counters.',
+            ref('AgentDeltasResponse'),
+          ),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+          '409': errorRef('Conflict'),
+        },
+      }),
+    },
+    '/v1/source-connections/{id}/agent-runs/{runId}/items': {
+      post: operation({
+        operationId: 'postAgentRunItem',
+        tag: 'Source Plane',
+        summary: 'One fetched item’s content',
+        description:
+          '`{ externalId, item }` — the item in the connector seam’s shape ' +
+          '(document text, binary as base64, conversation turns, a record ' +
+          'envelope), handed to the door for its shape under the connection’s ' +
+          'recorder and revision stamp. `skipped` when the content policy is ' +
+          '`manifest` or the fetch budget is spent. ' +
+          AGENT_NOTE,
+        scope: 'brain:write',
+        parameters: [idParam, runParam],
+        requestBody: jsonBody({
+          type: 'object',
+          required: ['externalId', 'item'],
+          properties: { externalId: { type: 'string' }, item: ref('FetchedItemWire') },
+        }),
+        responses: {
+          '201': jsonResponse('The item’s outcome.', ref('AgentItemResponse')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+          '409': errorRef('Conflict'),
+        },
+      }),
+    },
+    '/v1/source-connections/{id}/agent-runs/{runId}/finish': {
+      post: operation({
+        operationId: 'finishAgentRun',
+        tag: 'Source Plane',
+        summary: 'Finish an agent run',
+        description:
+          'Closes the run: on `succeeded` a full walk marks what it did not see ' +
+          'gone, the delete policy runs over everything gone since the run ' +
+          'began, and the checkpoint is recorded; on `failed` the connection ' +
+          'records the error. Returns the run summary (also the job_run result). ' +
+          AGENT_NOTE,
+        scope: 'brain:write',
+        parameters: [idParam, runParam],
+        requestBody: jsonBody(ref('FinishAgentRunRequest')),
+        responses: {
+          '201': jsonResponse('The run summary.', ref('SourceSyncSummary')),
+          '400': errorRef('BadRequest'),
+          ...AUTH_ERRORS,
+          '404': errorRef('NotFound'),
+          '409': errorRef('Conflict'),
         },
       }),
     },
@@ -2731,6 +3559,14 @@ export function buildOpenApiDocument(): Json {
           'annotations (owner/note) stay on the admin surface.',
       },
       {
+        name: 'Source Plane',
+        description:
+          'Where brain READS raw evidence from (scope `brain:admin`): ' +
+          'connections that instantiate a pack’s declared `sources` ' +
+          'entry, the per-connection catalogue of external items, and ' +
+          'the sync engine. Flag: `SOURCE_PLANE_ENABLED`.',
+      },
+      {
         name: 'Episodes',
         description:
           'The raw-substrate driver: verbatim pre-extraction dialogue ' +
@@ -2813,6 +3649,7 @@ export function buildOpenApiDocument(): Json {
       ...indexerWorkPaths(),
       ...indexerOperatorPaths(),
       ...sourcesPaths(),
+      ...sourcePlanePaths(),
       ...driverPaths(),
       ...memoryReadPaths(),
       ...evidencePaths(),

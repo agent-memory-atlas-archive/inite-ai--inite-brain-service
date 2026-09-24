@@ -38,6 +38,7 @@ import { RegistryModule } from './registry/registry.module';
 import { SourcesModule } from './sources/sources.module';
 import { MemoryFileModule } from './memory-files/memory-file.module';
 import { DocumentsModule } from './documents/documents.module';
+import { SourcePlaneModule } from './source-plane/source-plane.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { KeysModule } from './keys/keys.module';
 import { UsersModule } from './users/users.module';
@@ -118,6 +119,7 @@ import { MriModule } from './mri/mri.module';
     SourcesModule,
     MemoryFileModule,
     DocumentsModule,
+    SourcePlaneModule,
     EpisodesModule,
     UsersModule,
     StrategyModule,

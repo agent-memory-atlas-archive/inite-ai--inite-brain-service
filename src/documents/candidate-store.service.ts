@@ -413,6 +413,7 @@ export class CandidateStoreService {
             name: e.name,
             type: e.type,
             canonical: e.canonical,
+            ...(e.externalId ? { externalId: e.externalId } : {}),
             // The memory-context pin (extractor-internals/memory-context):
             // the knowledge_entity this mention refers to. Absent when the
             // extractor pinned nothing, so the row is unchanged for those.

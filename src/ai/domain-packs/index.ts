@@ -28,6 +28,7 @@ export * from './upgrade-diff';
 export * from './checksum';
 export * from './mcp-consent';
 export * from './modality-consent';
+export * from './sources-consent';
 export * from './signature';
 export * from './semver';
 export * from './eval-fixture';
@@ -42,6 +43,11 @@ export * from './medical.pack';
 export * from './legal.pack';
 export * from './insurance.pack';
 export * from './hr.pack';
+export * from './file-memory.pack';
+export * from './web-memory.pack';
+export * from './crm-memory.pack';
+export * from './mail-memory.pack';
+export * from './chat-memory.pack';
 
 import { REAL_ESTATE_PACK } from './real-estate.pack';
 import { FINTECH_PACK } from './fintech.pack';
@@ -49,6 +55,11 @@ import { MEDICAL_PACK } from './medical.pack';
 import { LEGAL_PACK } from './legal.pack';
 import { INSURANCE_PACK } from './insurance.pack';
 import { HR_PACK } from './hr.pack';
+import { FILE_MEMORY_PACK } from './file-memory.pack';
+import { WEB_MEMORY_PACK } from './web-memory.pack';
+import { CRM_MEMORY_PACK } from './crm-memory.pack';
+import { MAIL_MEMORY_PACK } from './mail-memory.pack';
+import { CHAT_MEMORY_PACK } from './chat-memory.pack';
 
 /** First-party distributable packs shipped in-repo (packs/*.json). The industry
  *  ontology library — distinct from BUILTIN_PACKS (globally seeded). */
@@ -59,6 +70,11 @@ export const FIRST_PARTY_PACKS: DomainPackManifest[] = [
   LEGAL_PACK,
   INSURANCE_PACK,
   HR_PACK,
+  FILE_MEMORY_PACK,
+  WEB_MEMORY_PACK,
+  CRM_MEMORY_PACK,
+  MAIL_MEMORY_PACK,
+  CHAT_MEMORY_PACK,
 ];
 
 // Every distributable manifest is validated at module load too (builtins get

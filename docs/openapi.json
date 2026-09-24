@@ -123,6 +123,289 @@
       }
     },
     "schemas": {
+      "AgentConnectionsListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "connections": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "connection": {
+                  "$ref": "#/components/schemas/SourceConnection"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": {},
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "connection",
+                "source"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "connections"
+        ],
+        "type": "object"
+      },
+      "AgentDeltasRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "deltas": {
+            "items": {
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "acl": {
+                          "additionalProperties": {},
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "type": "object"
+                        },
+                        "externalId": {
+                          "maxLength": 2048,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "mediaType": {
+                          "maxLength": 128,
+                          "type": "string"
+                        },
+                        "modifiedAt": {
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "originUri": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "path": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "revision": {
+                          "maxLength": 256,
+                          "type": "string"
+                        },
+                        "size": {
+                          "maximum": 9007199254740991,
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "title": {
+                          "maxLength": 512,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "externalId"
+                      ],
+                      "type": "object"
+                    },
+                    "type": {
+                      "const": "upsert",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "item"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "externalId": {
+                      "maxLength": 2048,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "gone",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "externalId"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "checkpoint": {
+                      "additionalProperties": {},
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "type": {
+                      "const": "checkpoint",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "checkpoint"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "maxItems": 1000,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "deltas"
+        ],
+        "type": "object"
+      },
+      "AgentDeltasResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "changed": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "fetch": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gone": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "new": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "seen": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "unchanged": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "fetch",
+          "seen",
+          "new",
+          "changed",
+          "unchanged",
+          "gone"
+        ],
+        "type": "object"
+      },
+      "AgentInventory": {
+        "additionalProperties": false,
+        "properties": {
+          "databases": {
+            "items": {
+              "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          },
+          "hostname": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "platform": {
+            "maxLength": 40,
+            "type": "string"
+          },
+          "roots": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "folders": {
+                  "items": {
+                    "maxLength": 1000,
+                    "type": "string"
+                  },
+                  "maxItems": 2000,
+                  "type": "array"
+                },
+                "path": {
+                  "maxLength": 1000,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "folders"
+              ],
+              "type": "object"
+            },
+            "maxItems": 32,
+            "type": "array"
+          },
+          "version": {
+            "maxLength": 40,
+            "type": "string"
+          }
+        },
+        "required": [
+          "roots"
+        ],
+        "type": "object"
+      },
+      "AgentItemResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ingested",
+              "deduplicated",
+              "failed",
+              "skipped"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
       "ApiKeySummary": {
         "additionalProperties": false,
         "properties": {
@@ -267,6 +550,75 @@
         ],
         "type": "object"
       },
+      "BeginAgentRunRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "agentId": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+            "type": "string"
+          },
+          "full": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "agentId"
+        ],
+        "type": "object"
+      },
+      "BeginAgentRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "checkpoint": {
+            "anyOf": [
+              {
+                "additionalProperties": {},
+                "propertyNames": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "contentPolicy": {
+            "enum": [
+              "manifest",
+              "text",
+              "bytes"
+            ],
+            "type": "string"
+          },
+          "fetchBudget": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "full": {
+            "type": "boolean"
+          },
+          "runId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "runId",
+          "full",
+          "checkpoint",
+          "contentPolicy",
+          "fetchBudget"
+        ],
+        "type": "object"
+      },
       "BeliefReadResponse": {
         "additionalProperties": false,
         "properties": {
@@ -373,6 +725,62 @@
         "required": [
           "beliefs",
           "found"
+        ],
+        "type": "object"
+      },
+      "BrowseResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "folders": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "path"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "parent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "roots": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path",
+          "parent",
+          "roots",
+          "folders",
+          "files",
+          "truncated"
         ],
         "type": "object"
       },
@@ -666,6 +1074,94 @@
           "id",
           "secret",
           "watermark"
+        ],
+        "type": "object"
+      },
+      "CreateSourceConnectionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "config": {
+            "additionalProperties": {},
+            "propertyNames": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "contentPolicy": {
+            "enum": [
+              "manifest",
+              "text",
+              "bytes"
+            ],
+            "type": "string"
+          },
+          "credential": {
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "deletePolicy": {
+            "enum": [
+              "close",
+              "retract",
+              "keep"
+            ],
+            "type": "string"
+          },
+          "fetchBudget": {
+            "exclusiveMinimum": 0,
+            "maximum": 100000,
+            "type": "integer"
+          },
+          "host": {
+            "maxLength": 80,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 120,
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "synced",
+              "linked"
+            ],
+            "type": "string"
+          },
+          "ownerUserId": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "packId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "schedule": {
+            "enum": [
+              "manual",
+              "15m",
+              "1h",
+              "4h",
+              "24h"
+            ],
+            "type": "string"
+          },
+          "sourceId": {
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          },
+          "vertical": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "packId",
+          "sourceId",
+          "vertical"
         ],
         "type": "object"
       },
@@ -1953,6 +2449,320 @@
         ],
         "type": "object"
       },
+      "FetchedItemWire": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "maxLength": 64,
+                "type": "string"
+              },
+              "occurredAt": {
+                "maxLength": 64,
+                "type": "string"
+              },
+              "shape": {
+                "const": "document",
+                "type": "string"
+              },
+              "text": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "title": {
+                "maxLength": 512,
+                "type": "string"
+              }
+            },
+            "required": [
+              "shape",
+              "text"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "bytesBase64": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "mediaType": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              "modality": {
+                "enum": [
+                  "image",
+                  "audio",
+                  "video",
+                  "document",
+                  "sensor"
+                ],
+                "type": "string"
+              },
+              "occurredAt": {
+                "maxLength": 64,
+                "type": "string"
+              },
+              "shape": {
+                "const": "binary",
+                "type": "string"
+              }
+            },
+            "required": [
+              "shape",
+              "bytesBase64",
+              "mediaType",
+              "modality"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "conversationId": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "shape": {
+                "const": "conversation",
+                "type": "string"
+              },
+              "turns": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "at": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "messageId": {
+                      "maxLength": 200,
+                      "type": "string"
+                    },
+                    "role": {
+                      "maxLength": 40,
+                      "type": "string"
+                    },
+                    "speaker": {
+                      "maxLength": 200,
+                      "type": "string"
+                    },
+                    "text": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "text"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 5000,
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "shape",
+              "conversationId",
+              "turns"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "mapping": {
+                "additionalProperties": false,
+                "properties": {
+                  "coreType": {
+                    "enum": [
+                      "customer",
+                      "staff",
+                      "asset",
+                      "project",
+                      "topic",
+                      "location",
+                      "other"
+                    ],
+                    "type": "string"
+                  },
+                  "fields": {
+                    "additionalProperties": {
+                      "maxLength": 96,
+                      "type": "string"
+                    },
+                    "propertyNames": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "lifecycle": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "field": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "model": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "states": {
+                        "additionalProperties": {
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "propertyNames": {
+                          "maxLength": 128,
+                          "type": "string"
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "field",
+                      "model"
+                    ],
+                    "type": "object"
+                  },
+                  "text": {
+                    "items": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "maxItems": 16,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "fields"
+                ],
+                "type": "object"
+              },
+              "record": {
+                "additionalProperties": false,
+                "properties": {
+                  "attributes": {
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "number",
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "propertyNames": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "entityType": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "externalId": {
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "name": {
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "relations": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": {
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "targetExternalId": {
+                          "maxLength": 512,
+                          "type": "string"
+                        },
+                        "targetName": {
+                          "maxLength": 512,
+                          "type": "string"
+                        },
+                        "targetType": {
+                          "maxLength": 64,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "targetType",
+                        "targetExternalId"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 500,
+                    "type": "array"
+                  },
+                  "updatedAt": {
+                    "maxLength": 64,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "entityType",
+                  "externalId",
+                  "name",
+                  "attributes"
+                ],
+                "type": "object"
+              },
+              "shape": {
+                "const": "structure",
+                "type": "string"
+              }
+            },
+            "required": [
+              "shape",
+              "record"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "FinishAgentRunRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "checkpoint": {
+            "additionalProperties": {},
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "error": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "succeeded",
+              "failed"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
       "GrantEvidenceAccessRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3168,6 +3978,9 @@
       "IngestMentionResponse": {
         "additionalProperties": false,
         "properties": {
+          "episodeId": {
+            "type": "string"
+          },
           "extractedEdgeIds": {
             "items": {
               "type": "string"
@@ -3209,6 +4022,9 @@
           "acceptModalities": {
             "type": "boolean"
           },
+          "acceptSources": {
+            "type": "boolean"
+          },
           "packId": {
             "type": "string"
           },
@@ -3228,6 +4044,9 @@
             "type": "boolean"
           },
           "acceptModalities": {
+            "type": "boolean"
+          },
+          "acceptSources": {
             "type": "boolean"
           },
           "expectedChecksum": {
@@ -3460,6 +4279,684 @@
         "required": [
           "vertical",
           "id"
+        ],
+        "type": "object"
+      },
+      "MappingAssistRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "allowPrivate": {
+            "type": "boolean"
+          },
+          "baseUrl": {
+            "format": "uri",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "endpoints": {
+            "additionalProperties": {
+              "additionalProperties": false,
+              "properties": {
+                "attributes": {
+                  "additionalProperties": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "propertyNames": {
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "deleted": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "fields": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "name": {
+                      "items": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "maxItems": 4,
+                      "minItems": 1,
+                      "type": "array"
+                    },
+                    "updatedAt": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ],
+                  "type": "object"
+                },
+                "get": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "path": {
+                      "maxLength": 512,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "type": "object"
+                },
+                "incremental": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "format": {
+                      "enum": [
+                        "iso",
+                        "epoch",
+                        "epoch_ms",
+                        "date"
+                      ],
+                      "type": "string"
+                    },
+                    "in": {
+                      "enum": [
+                        "query",
+                        "body"
+                      ],
+                      "type": "string"
+                    },
+                    "param": {
+                      "maxLength": 64,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "param"
+                  ],
+                  "type": "object"
+                },
+                "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "label": {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                "list": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "body": {
+                      "additionalProperties": {},
+                      "propertyNames": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "method": {
+                      "enum": [
+                        "GET",
+                        "POST"
+                      ],
+                      "type": "string"
+                    },
+                    "path": {
+                      "maxLength": 512,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "query": {
+                      "additionalProperties": {
+                        "maxLength": 256,
+                        "type": "string"
+                      },
+                      "propertyNames": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "type": "object"
+                },
+                "paging": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "next": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "param": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "size": {
+                      "maximum": 1000,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "sizeParam": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "start": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "style": {
+                      "enum": [
+                        "none",
+                        "page",
+                        "offset",
+                        "cursor",
+                        "link"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "style"
+                  ],
+                  "type": "object"
+                },
+                "relations": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "name": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "path": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "targetType": {
+                        "pattern": "^[a-z][a-z0-9_]{0,31}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "targetType",
+                      "path"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 16,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "list",
+                "fields"
+              ],
+              "type": "object"
+            },
+            "propertyNames": {
+              "pattern": "^[a-z][a-z0-9_]{0,31}$",
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "openapi": {
+            "additionalProperties": false,
+            "properties": {
+              "text": {
+                "maxLength": 2000000,
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "maxLength": 2048,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "packId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "samples": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "json": {},
+                "path": {
+                  "maxLength": 512,
+                  "type": "string"
+                },
+                "type": {
+                  "pattern": "^[a-z][a-z0-9_]{0,31}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "json"
+              ],
+              "type": "object"
+            },
+            "maxItems": 16,
+            "type": "array"
+          }
+        },
+        "required": [
+          "packId"
+        ],
+        "type": "object"
+      },
+      "MappingAssistResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "endpoints": {
+            "additionalProperties": {
+              "additionalProperties": false,
+              "properties": {
+                "attributes": {
+                  "additionalProperties": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "propertyNames": {
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "deleted": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "fields": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "name": {
+                      "items": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "maxItems": 4,
+                      "minItems": 1,
+                      "type": "array"
+                    },
+                    "updatedAt": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ],
+                  "type": "object"
+                },
+                "get": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "path": {
+                      "maxLength": 512,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "type": "object"
+                },
+                "incremental": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "format": {
+                      "enum": [
+                        "iso",
+                        "epoch",
+                        "epoch_ms",
+                        "date"
+                      ],
+                      "type": "string"
+                    },
+                    "in": {
+                      "enum": [
+                        "query",
+                        "body"
+                      ],
+                      "type": "string"
+                    },
+                    "param": {
+                      "maxLength": 64,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "param"
+                  ],
+                  "type": "object"
+                },
+                "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "label": {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                "list": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "body": {
+                      "additionalProperties": {},
+                      "propertyNames": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "method": {
+                      "enum": [
+                        "GET",
+                        "POST"
+                      ],
+                      "type": "string"
+                    },
+                    "path": {
+                      "maxLength": 512,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "query": {
+                      "additionalProperties": {
+                        "maxLength": 256,
+                        "type": "string"
+                      },
+                      "propertyNames": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "type": "object"
+                },
+                "paging": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "next": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "param": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "size": {
+                      "maximum": 1000,
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "sizeParam": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "start": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "style": {
+                      "enum": [
+                        "none",
+                        "page",
+                        "offset",
+                        "cursor",
+                        "link"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "style"
+                  ],
+                  "type": "object"
+                },
+                "relations": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "name": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "path": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "targetType": {
+                        "pattern": "^[a-z][a-z0-9_]{0,31}$",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "targetType",
+                      "path"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 16,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "list",
+                "fields"
+              ],
+              "type": "object"
+            },
+            "propertyNames": {
+              "pattern": "^[a-z][a-z0-9_]{0,31}$",
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "entities": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "confidence": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "fields": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "label"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "source": {
+                  "enum": [
+                    "openapi",
+                    "sample",
+                    "model",
+                    "operator"
+                  ],
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "label",
+                "source",
+                "confidence",
+                "reason",
+                "fields"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "mapping": {
+            "additionalProperties": {
+              "additionalProperties": false,
+              "properties": {
+                "coreType": {
+                  "enum": [
+                    "customer",
+                    "staff",
+                    "asset",
+                    "project",
+                    "topic",
+                    "location",
+                    "other"
+                  ],
+                  "type": "string"
+                },
+                "fields": {
+                  "additionalProperties": {
+                    "maxLength": 96,
+                    "type": "string"
+                  },
+                  "propertyNames": {
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "lifecycle": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "model": {
+                      "maxLength": 64,
+                      "type": "string"
+                    },
+                    "states": {
+                      "additionalProperties": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "propertyNames": {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "field",
+                    "model"
+                  ],
+                  "type": "object"
+                },
+                "text": {
+                  "items": {
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "maxItems": 16,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "fields"
+              ],
+              "type": "object"
+            },
+            "propertyNames": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "refined": {
+            "type": "boolean"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "endpoints",
+          "mapping",
+          "entities",
+          "refined",
+          "warnings"
         ],
         "type": "object"
       },
@@ -4342,6 +5839,180 @@
         ],
         "type": "object"
       },
+      "PushRecordsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "gone": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 200,
+            "type": "array"
+          },
+          "records": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "attributes": {
+                  "additionalProperties": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "propertyNames": {
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "entityType": {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "externalId": {
+                  "maxLength": 512,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "name": {
+                  "maxLength": 512,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "relations": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "targetExternalId": {
+                        "maxLength": 512,
+                        "type": "string"
+                      },
+                      "targetName": {
+                        "maxLength": 512,
+                        "type": "string"
+                      },
+                      "targetType": {
+                        "maxLength": 64,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "targetType",
+                      "targetExternalId"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 500,
+                  "type": "array"
+                },
+                "updatedAt": {
+                  "maxLength": 64,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "entityType",
+                "externalId",
+                "name",
+                "attributes"
+              ],
+              "type": "object"
+            },
+            "maxItems": 200,
+            "type": "array"
+          },
+          "sourceVersion": {
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
+        "required": [
+          "records"
+        ],
+        "type": "object"
+      },
+      "PushRecordsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "closed": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "deduplicated": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "errors": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "externalId": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "externalId",
+                "error"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "failed": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "gone": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "ingested": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "received": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "runId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "runId",
+          "received",
+          "ingested",
+          "deduplicated",
+          "failed",
+          "gone",
+          "closed",
+          "errors"
+        ],
+        "type": "object"
+      },
       "RebuildProjectionRequest": {
         "additionalProperties": false,
         "properties": {
@@ -4443,6 +6114,235 @@
           "status",
           "failed",
           "outcome"
+        ],
+        "type": "object"
+      },
+      "RecordsPreviewRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "config": {
+            "additionalProperties": {},
+            "propertyNames": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "credential": {
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "limit": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "packId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceId": {
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "packId",
+          "sourceId"
+        ],
+        "type": "object"
+      },
+      "RecordsPreviewResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "entities": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "records": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "dropped": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "key": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "key",
+                            "reason"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "facts": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "object": {
+                              "type": "string"
+                            },
+                            "predicate": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "predicate",
+                            "object"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "record": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "attributes": {
+                            "additionalProperties": {
+                              "type": [
+                                "string",
+                                "number",
+                                "boolean",
+                                "null"
+                              ]
+                            },
+                            "propertyNames": {
+                              "maxLength": 64,
+                              "type": "string"
+                            },
+                            "type": "object"
+                          },
+                          "entityType": {
+                            "maxLength": 64,
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "externalId": {
+                            "maxLength": 512,
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "name": {
+                            "maxLength": 512,
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "relations": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "kind": {
+                                  "maxLength": 64,
+                                  "type": "string"
+                                },
+                                "targetExternalId": {
+                                  "maxLength": 512,
+                                  "type": "string"
+                                },
+                                "targetName": {
+                                  "maxLength": 512,
+                                  "type": "string"
+                                },
+                                "targetType": {
+                                  "maxLength": 64,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "targetType",
+                                "targetExternalId"
+                              ],
+                              "type": "object"
+                            },
+                            "maxItems": 500,
+                            "type": "array"
+                          },
+                          "updatedAt": {
+                            "maxLength": 64,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "entityType",
+                          "externalId",
+                          "name",
+                          "attributes"
+                        ],
+                        "type": "object"
+                      },
+                      "relations": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "kind": {
+                              "type": "string"
+                            },
+                            "target": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "target"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "unmapped": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "record",
+                      "facts",
+                      "relations",
+                      "unmapped",
+                      "dropped"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "label",
+                "records",
+                "error"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "entities"
         ],
         "type": "object"
       },
@@ -4744,6 +6644,22 @@
         "required": [
           "grantId",
           "revoked"
+        ],
+        "type": "object"
+      },
+      "RevokeGrantResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "providerRevoked": {
+            "type": "boolean"
+          },
+          "revoked": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "revoked",
+          "providerRevoked"
         ],
         "type": "object"
       },
@@ -5207,6 +7123,814 @@
         ],
         "type": "object"
       },
+      "SourceAgentsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "agents": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "agentId": {
+                  "type": "string"
+                },
+                "databases": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "firstSeenAt": {
+                  "type": "string"
+                },
+                "hostname": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "lastSeenAt": {
+                  "type": "string"
+                },
+                "platform": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "roots": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "folders": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "path": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "folders"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "version": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "agentId",
+                "firstSeenAt",
+                "lastSeenAt",
+                "version",
+                "hostname",
+                "platform",
+                "roots",
+                "databases"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "agents"
+        ],
+        "type": "object"
+      },
+      "SourceCatalogResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "connectors": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "flag": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "state": {
+                  "enum": [
+                    "ready",
+                    "disabled"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "state",
+                "flag"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "egressAllowPrivate": {
+            "type": "boolean"
+          },
+          "fsRoots": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "accepted": {
+                  "type": "boolean"
+                },
+                "availability": {
+                  "enum": [
+                    "ready",
+                    "disabled",
+                    "missing",
+                    "agent",
+                    "external"
+                  ],
+                  "type": "string"
+                },
+                "builtin": {
+                  "type": "boolean"
+                },
+                "configExample": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": {},
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "connector": {
+                  "type": "string"
+                },
+                "credentialHint": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "defaults": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "contentPolicy": {
+                      "enum": [
+                        "manifest",
+                        "text",
+                        "bytes"
+                      ],
+                      "type": "string"
+                    },
+                    "deletePolicy": {
+                      "enum": [
+                        "close",
+                        "retract",
+                        "keep"
+                      ],
+                      "type": "string"
+                    },
+                    "schedule": {
+                      "enum": [
+                        "manual",
+                        "15m",
+                        "1h",
+                        "4h",
+                        "24h"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "contentPolicy",
+                    "deletePolicy",
+                    "schedule"
+                  ],
+                  "type": "object"
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "hosts": {
+                  "items": {
+                    "enum": [
+                      "server",
+                      "agent"
+                    ],
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "kind": {
+                  "enum": [
+                    "mcp",
+                    "native",
+                    "external"
+                  ],
+                  "type": "string"
+                },
+                "mcp": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "args": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "auth": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "none",
+                                "install_secret",
+                                "oauth"
+                              ],
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "command": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "transport": {
+                          "enum": [
+                            "http",
+                            "stdio"
+                          ],
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "transport",
+                        "url",
+                        "auth",
+                        "command",
+                        "args"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "oauth": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "configured": {
+                          "type": "boolean"
+                        },
+                        "provider": {
+                          "type": "string"
+                        },
+                        "scopes": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "provider",
+                        "title",
+                        "scopes",
+                        "configured"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "packId": {
+                  "type": "string"
+                },
+                "packVersion": {
+                  "type": "string"
+                },
+                "records": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "entities": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "defaultOn": {
+                                "type": "boolean"
+                              },
+                              "fields": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "key": {
+                                      "type": "string"
+                                    },
+                                    "label": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "key",
+                                    "label"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "label",
+                              "defaultOn",
+                              "fields"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "predicates": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "label": {
+                                "type": "string"
+                              },
+                              "localId": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "localId",
+                              "label"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "preset": {
+                          "additionalProperties": {},
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "entities",
+                        "preset",
+                        "predicates"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "shape": {
+                  "enum": [
+                    "document",
+                    "conversation",
+                    "binary",
+                    "structure"
+                  ],
+                  "type": "string"
+                },
+                "sourceId": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "webhook": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "scheme": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "scheme"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "packId",
+                "packVersion",
+                "builtin",
+                "accepted",
+                "sourceId",
+                "kind",
+                "connector",
+                "shape",
+                "title",
+                "description",
+                "defaults",
+                "availability",
+                "configExample",
+                "credentialHint",
+                "hosts",
+                "mcp",
+                "oauth",
+                "records",
+                "webhook"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "webhooks": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sources",
+          "connectors",
+          "fsRoots",
+          "egressAllowPrivate",
+          "webhooks"
+        ],
+        "type": "object"
+      },
+      "SourceConnection": {
+        "additionalProperties": false,
+        "properties": {
+          "checkpoint": {
+            "anyOf": [
+              {
+                "additionalProperties": {},
+                "propertyNames": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "config": {
+            "additionalProperties": {},
+            "propertyNames": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "connector": {
+            "type": "string"
+          },
+          "contentPolicy": {
+            "enum": [
+              "manifest",
+              "text",
+              "bytes"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "deletePolicy": {
+            "enum": [
+              "close",
+              "retract",
+              "keep"
+            ],
+            "type": "string"
+          },
+          "fetchBudget": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grantId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasCredential": {
+            "type": "boolean"
+          },
+          "host": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "mcp",
+              "native",
+              "external"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastError": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastSyncAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastSyncStatus": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mode": {
+            "enum": [
+              "synced",
+              "linked"
+            ],
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "packId": {
+            "type": "string"
+          },
+          "recorder": {
+            "type": "string"
+          },
+          "schedule": {
+            "enum": [
+              "manual",
+              "15m",
+              "1h",
+              "4h",
+              "24h"
+            ],
+            "type": "string"
+          },
+          "shape": {
+            "enum": [
+              "document",
+              "conversation",
+              "binary",
+              "structure"
+            ],
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "paused",
+              "deleting"
+            ],
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vertical": {
+            "type": "string"
+          },
+          "webhook": {
+            "additionalProperties": false,
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "lastEventAt": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "enabled",
+              "lastEventAt"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "packId",
+          "sourceId",
+          "kind",
+          "connector",
+          "shape",
+          "host",
+          "label",
+          "config",
+          "hasCredential",
+          "grantId",
+          "mode",
+          "schedule",
+          "contentPolicy",
+          "deletePolicy",
+          "fetchBudget",
+          "status",
+          "checkpoint",
+          "vertical",
+          "recorder",
+          "sourceKey",
+          "ownerUserId",
+          "lastSyncAt",
+          "lastSyncStatus",
+          "lastError",
+          "webhook",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "SourceConnectionStats": {
+        "additionalProperties": false,
+        "properties": {
+          "connectionId": {
+            "type": "string"
+          },
+          "facts": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "active": {
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991,
+                    "type": "integer"
+                  },
+                  "closed": {
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991,
+                    "type": "integer"
+                  },
+                  "stale": {
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "active",
+                  "stale",
+                  "closed"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "fetched": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "gone": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "indexed": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "seen": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "total": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "seen",
+              "fetched",
+              "indexed",
+              "gone",
+              "total"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "connectionId",
+          "items",
+          "facts"
+        ],
+        "type": "object"
+      },
+      "SourceConnectionsListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "connections": {
+            "items": {
+              "$ref": "#/components/schemas/SourceConnection"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "connections"
+        ],
+        "type": "object"
+      },
       "SourceEvidence": {
         "additionalProperties": false,
         "properties": {
@@ -5261,6 +7985,1006 @@
           "agreementRate",
           "sampleCount",
           "recordedAt"
+        ],
+        "type": "object"
+      },
+      "SourceItem": {
+        "additionalProperties": false,
+        "properties": {
+          "assetId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "connectionId": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "episodeId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "fetchedRevision": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firstSeenAt": {
+            "type": "string"
+          },
+          "goneAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastSeenAt": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "modifiedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "originUri": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "revision": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "size": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "enum": [
+              "seen",
+              "fetched",
+              "indexed",
+              "gone"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "connectionId",
+          "externalId",
+          "originUri",
+          "path",
+          "title",
+          "mediaType",
+          "size",
+          "revision",
+          "fetchedRevision",
+          "modifiedAt",
+          "documentId",
+          "assetId",
+          "episodeId",
+          "state",
+          "firstSeenAt",
+          "lastSeenAt",
+          "goneAt",
+          "lastError"
+        ],
+        "type": "object"
+      },
+      "SourceItemInspectResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "asset": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "availability": {
+                    "type": "string"
+                  },
+                  "byteLength": {
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991,
+                    "type": "integer"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "mediaType": {
+                    "type": "string"
+                  },
+                  "modality": {
+                    "type": "string"
+                  },
+                  "quarantineStatus": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "representations": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "chars": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "createdAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "producerVersion": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "kind",
+                        "producerVersion",
+                        "chars",
+                        "createdAt"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "id",
+                  "mediaType",
+                  "modality",
+                  "byteLength",
+                  "availability",
+                  "quarantineStatus",
+                  "representations"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "documents": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "createdAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "originUri": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "title": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "kind",
+                "status",
+                "originUri",
+                "createdAt"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "episode": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "conversationId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "messageId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "occurredAt": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "speaker": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "conversationId",
+                  "messageId",
+                  "speaker",
+                  "text",
+                  "occurredAt"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "facts": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "confidence": {
+                  "type": "number"
+                },
+                "entityId": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "predicate": {
+                  "type": "string"
+                },
+                "staleAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "staleReason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "type": "string"
+                },
+                "validUntil": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "version": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "entityId",
+                "predicate",
+                "object",
+                "confidence",
+                "version",
+                "staleAt",
+                "staleReason",
+                "validUntil",
+                "status"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "factsTruncated": {
+            "type": "boolean"
+          },
+          "item": {
+            "$ref": "#/components/schemas/SourceItem"
+          }
+        },
+        "required": [
+          "item",
+          "documents",
+          "asset",
+          "episode",
+          "facts",
+          "factsTruncated"
+        ],
+        "type": "object"
+      },
+      "SourceItemsListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SourceItem"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "offset": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "total": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "type": "object"
+      },
+      "SourceOAuthGrantsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "grants": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "accessExpiresAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "account": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "actor": {
+                  "type": "string"
+                },
+                "apiBase": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "lastError": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "lastRefreshAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "ownerUserId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "provider": {
+                  "type": "string"
+                },
+                "refreshable": {
+                  "type": "boolean"
+                },
+                "resource": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "scopes": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "status": {
+                  "enum": [
+                    "active",
+                    "revoked",
+                    "broken"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "provider",
+                "account",
+                "scopes",
+                "status",
+                "actor",
+                "ownerUserId",
+                "accessExpiresAt",
+                "refreshable",
+                "lastRefreshAt",
+                "lastError",
+                "resource",
+                "apiBase",
+                "createdAt"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "providers": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "configured": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "enum": [
+                    "google",
+                    "microsoft",
+                    "dropbox",
+                    "pipedrive",
+                    "hubspot",
+                    "salesforce",
+                    "bitrix24",
+                    "kommo",
+                    "notion",
+                    "atlassian",
+                    "slack",
+                    "github"
+                  ],
+                  "type": "string"
+                },
+                "redirectUri": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "configured",
+                "redirectUri"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "ready": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "grants",
+          "providers",
+          "ready"
+        ],
+        "type": "object"
+      },
+      "SourceOAuthMcpStartRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "allowPrivate": {
+            "type": "boolean"
+          },
+          "client": {
+            "additionalProperties": false,
+            "properties": {
+              "clientId": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "clientSecret": {
+                "maxLength": 2048,
+                "type": "string"
+              }
+            },
+            "required": [
+              "clientId"
+            ],
+            "type": "object"
+          },
+          "origin": {
+            "format": "uri",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "ownerUserId": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "serverUrl": {
+            "format": "uri",
+            "maxLength": 2048,
+            "type": "string"
+          }
+        },
+        "required": [
+          "serverUrl"
+        ],
+        "type": "object"
+      },
+      "SourceOAuthMcpStartResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "authorizeUrl": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authorizeUrl",
+          "state",
+          "expiresAt",
+          "resource"
+        ],
+        "type": "object"
+      },
+      "SourceOAuthStartRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "connector": {
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "origin": {
+            "format": "uri",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "ownerUserId": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "google",
+              "microsoft",
+              "dropbox",
+              "pipedrive",
+              "hubspot",
+              "salesforce",
+              "bitrix24",
+              "kommo",
+              "notion",
+              "atlassian",
+              "slack",
+              "github"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "connector"
+        ],
+        "type": "object"
+      },
+      "SourceOAuthStartResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "authorizeUrl": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authorizeUrl",
+          "state",
+          "expiresAt"
+        ],
+        "type": "object"
+      },
+      "SourceRunsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "connectionId": {
+            "type": "string"
+          },
+          "persisted": {
+            "type": "boolean"
+          },
+          "runs": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "counters": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "changed": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "closed": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "deduplicated": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "failed": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "fetched": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "gone": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "ingested": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "new": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "seen": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        },
+                        "unchanged": {
+                          "maximum": 9007199254740991,
+                          "minimum": -9007199254740991,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "seen",
+                        "new",
+                        "changed",
+                        "unchanged",
+                        "gone",
+                        "fetched",
+                        "ingested",
+                        "deduplicated",
+                        "failed",
+                        "closed"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "durationMs": {
+                  "anyOf": [
+                    {
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "finishedAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "mode": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "full",
+                        "incremental",
+                        "webhook"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "ranBy": {
+                  "type": "string"
+                },
+                "runId": {
+                  "type": "string"
+                },
+                "skipped": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "startedAt": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "cancelled",
+                    "pending"
+                  ],
+                  "type": "string"
+                },
+                "triggeredBy": {
+                  "enum": [
+                    "cron",
+                    "manual",
+                    "startup"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "runId",
+                "status",
+                "ranBy",
+                "triggeredBy",
+                "startedAt",
+                "finishedAt",
+                "durationMs",
+                "mode",
+                "counters",
+                "skipped",
+                "error"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "connectionId",
+          "persisted",
+          "runs"
+        ],
+        "type": "object"
+      },
+      "SourceSyncSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "changed": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "closed": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "connectionId": {
+            "type": "string"
+          },
+          "deduplicated": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "durationMs": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "failed": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "fetched": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "gone": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "ingested": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "mode": {
+            "enum": [
+              "full",
+              "incremental"
+            ],
+            "type": "string"
+          },
+          "new": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "seen": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "skipped": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "succeeded",
+              "failed",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "unchanged": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "connectionId",
+          "mode",
+          "status",
+          "seen",
+          "new",
+          "changed",
+          "unchanged",
+          "gone",
+          "fetched",
+          "ingested",
+          "deduplicated",
+          "failed",
+          "closed",
+          "durationMs"
         ],
         "type": "object"
       },
@@ -5526,6 +9250,11 @@
           "canonical": {
             "type": "string"
           },
+          "externalId": {
+            "description": "The system-of-record's own id for the entity (a CRM contact id): the authoritative identity — same id ⇒ same entity whatever the name; never merged by name alone.",
+            "maxLength": 256,
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -5593,6 +9322,60 @@
           "kind"
         ],
         "type": "object"
+      },
+      "SyncNowRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "full": {
+            "type": "boolean"
+          },
+          "inline": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "SyncNowResponse": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "created": {
+                "type": "boolean"
+              },
+              "enqueued": {
+                "const": true,
+                "type": "boolean"
+              },
+              "runId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "enqueued",
+              "runId",
+              "created"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "enqueued": {
+                "const": false,
+                "type": "boolean"
+              },
+              "summary": {
+                "$ref": "#/components/schemas/SourceSyncSummary"
+              }
+            },
+            "required": [
+              "enqueued",
+              "summary"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "SynthesisReason": {
         "enum": [
@@ -5913,6 +9696,87 @@
         ],
         "type": "object"
       },
+      "UpdateSourceConnectionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "config": {
+            "additionalProperties": {},
+            "propertyNames": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "contentPolicy": {
+            "enum": [
+              "manifest",
+              "text",
+              "bytes"
+            ],
+            "type": "string"
+          },
+          "credential": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deletePolicy": {
+            "enum": [
+              "close",
+              "retract",
+              "keep"
+            ],
+            "type": "string"
+          },
+          "fetchBudget": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 100000,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schedule": {
+            "enum": [
+              "manual",
+              "15m",
+              "1h",
+              "4h",
+              "24h"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "paused"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UploadEvidenceBlobResponse": {
         "additionalProperties": false,
         "properties": {
@@ -6047,6 +9911,145 @@
           "factCount",
           "sections",
           "profileText"
+        ],
+        "type": "object"
+      },
+      "WebhookReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "ignored": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "runId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "summary": {
+            "additionalProperties": false,
+            "properties": {
+              "closed": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "connectionId": {
+                "type": "string"
+              },
+              "deduplicated": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "errors": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "externalId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "externalId",
+                    "error"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "failed": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "fetched": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "gone": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "ingested": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "received": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "connectionId",
+              "received",
+              "fetched",
+              "ingested",
+              "deduplicated",
+              "gone",
+              "closed",
+              "failed",
+              "errors"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "accepted",
+          "ignored",
+          "runId"
+        ],
+        "type": "object"
+      },
+      "WebhookSetupRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "secret": {
+            "maxLength": 256,
+            "minLength": 16,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WebhookSetupResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "secret",
+          "scheme",
+          "notes"
         ],
         "type": "object"
       },
@@ -6962,6 +10965,979 @@
         "summary": "Write a publisher's public profile",
         "tags": [
           "Marketplace"
+        ]
+      }
+    },
+    "/v1/admin/source-connections": {
+      "get": {
+        "description": "Every connection the tenant has created for a pack’s declared `sources` entry, newest first, with its schedule, policies, checkpoint and last-sync bookkeeping. Credentials are never serialised — only `hasCredential`. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "listSourceConnections",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceConnectionsListResponse"
+                }
+              }
+            },
+            "description": "The connections."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "List this tenant’s source connections",
+        "tags": [
+          "Source Plane"
+        ]
+      },
+      "post": {
+        "description": "Instantiates one `sources[]` entry of an installed (and consented — `acceptSources`) or builtin pack: a `native` entry must name a connector this brain ships, `mcp` is harvested by brain, `external` is a catalogue the publisher fills. The connection becomes a `source_registry` recorder (`vertical:recorder`) so per-connection trust is learned; `ownerUserId` makes it personal (every row it writes is user-fenced). Defaults for schedule / policies come from the entry. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "createSourceConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSourceConnectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceConnection"
+                }
+              }
+            },
+            "description": "Created."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Connect a pack’s declared source",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/agents": {
+      "get": {
+        "description": "Every agent that checked in: when, from which host and version, and the folders it reported under its roots (names only) — the folder picker for agent-host connections. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "listSourceAgents",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceAgentsResponse"
+                }
+              }
+            },
+            "description": "The agents."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "The local agents this tenant has heard from",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/assist": {
+      "post": {
+        "description": "The mapping assistant for a backend with no connector of its own: from an OpenAPI 3.x document (fetched through the egress guard, or pasted as JSON / YAML) and / or sample list answers, propose the `rest_records` endpoints — the entity types, where the rows sit, the paging style, the updated-since parameter, the id / name / updated-at fields, the relation fields — and the field → predicate mapping over the pack vocabulary, each entity with a reason and a confidence. Deterministic heuristics always; under `SOURCE_MAPPING_ASSISTANT` one bounded model call refines them (validated, never trusted). Nothing is written; the preview verifies the proposal by execution. Records (docs/roadmap/crm-sources-2026-09.md): a CRM row enters as FACTS — its mapped attributes become deterministic candidates under the record’s own id, never prose a model re-extracts. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "assistSourceMapping",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MappingAssistRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MappingAssistResponse"
+                }
+              }
+            },
+            "description": "The proposal."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Propose a rest_records config from an OpenAPI document or sample answers",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/browse": {
+      "get": {
+        "description": "The folder picker for server-host connections: without `path`, the jail roots; with one, its subfolders (hidden, VCS and build directories left out, symlinks never followed) and a count of files. A path outside the jail, or any path when no jail is set, is refused. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "browseSourceFolders",
+        "parameters": [
+          {
+            "description": "The directory to list; empty = the jail roots.",
+            "in": "query",
+            "name": "path",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowseResponse"
+                }
+              }
+            },
+            "description": "The level."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "One level of the brain host’s disk, inside SOURCE_FS_ROOTS",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/catalog": {
+      "get": {
+        "description": "The connectable catalogue: every `sources[]` entry of every pack the tenant has (builtin and installed, with its consent state), each with an `availability` — `ready`, `disabled` (the connector’s SOURCE_KIND switch is off), `missing` (this build ships no such connector), `agent` (stdio MCP, local-agent host) or `external` (the publisher pushes) — and the connector’s static `configExample` / `credentialHint`; plus the shipped connectors with their switches and the two operator fences (`fsRoots`, `egressAllowPrivate`). Read-only; never runs a connector, never reveals a credential. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "listSourceCatalog",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceCatalogResponse"
+                }
+              }
+            },
+            "description": "The catalogue."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "What this tenant can connect here",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/oauth/grants": {
+      "get": {
+        "description": "Every grant (provider, account label, scopes, status, whether it can refresh itself, when its access token expires) — never a token — plus each provider’s readiness (an app registered or not) and the redirect URI to register. Connected accounts (docs/source-plane.md § Connected accounts): the brain as an outbound OAuth 2.1 client for the cloud connectors (gdrive, onedrive, dropbox). Answers a bare 404 until `SOURCE_PLANE_ENABLED=1` and `SOURCE_OAUTH_CLIENT=1`; needs `SOURCE_CREDENTIAL_ENCRYPTION_KEY` — tokens are never stored in the clear.\n\nRequired scope: `brain:admin`.",
+        "operationId": "listSourceOAuthGrants",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceOAuthGrantsResponse"
+                }
+              }
+            },
+            "description": "The grants."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "The accounts connected, and the providers this deployment can connect",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/oauth/grants/{id}": {
+      "delete": {
+        "description": "Revokes the token at the provider (best effort; `providerRevoked` says whether it accepted) and marks the grant revoked. Connections that run as it fail their next sync by name until reconnected. Connected accounts (docs/source-plane.md § Connected accounts): the brain as an outbound OAuth 2.1 client for the cloud connectors (gdrive, onedrive, dropbox). Answers a bare 404 until `SOURCE_PLANE_ENABLED=1` and `SOURCE_OAUTH_CLIENT=1`; needs `SOURCE_CREDENTIAL_ENCRYPTION_KEY` — tokens are never stored in the clear.\n\nRequired scope: `brain:admin`.",
+        "operationId": "revokeSourceOAuthGrant",
+        "parameters": [
+          {
+            "description": "The grant id (`source_oauth_grant:<id>`, prefix optional).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokeGrantResponse"
+                }
+              }
+            },
+            "description": "Disconnected."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Disconnect an account",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/oauth/mcp/start": {
+      "post": {
+        "description": "The brain as an OAuth client of any MCP server (W4.3): the server’s authorization server is discovered from its 401 (RFC 9728 protected-resource metadata → RFC 8414 / OpenID metadata), a client is registered there dynamically (RFC 7591) unless one the operator registered is passed, and the admin is sent to consent with PKCE and the RFC 8707 `resource`. The callback keeps a `mcp` grant for that resource; a pack’s `auth: oauth` MCP source then runs as it. 404 until `SOURCE_MCP_OAUTH=1`. Connected accounts (docs/source-plane.md § Connected accounts): the brain as an outbound OAuth 2.1 client for the cloud connectors (gdrive, onedrive, dropbox). Answers a bare 404 until `SOURCE_PLANE_ENABLED=1` and `SOURCE_OAUTH_CLIENT=1`; needs `SOURCE_CREDENTIAL_ENCRYPTION_KEY` — tokens are never stored in the clear.\n\nRequired scope: `brain:admin`.",
+        "operationId": "startSourceMcpOAuth",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceOAuthMcpStartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceOAuthMcpStartResponse"
+                }
+              }
+            },
+            "description": "The consent URL, the state and the resource."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Sign in at an MCP server (discovered authorization server)",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/oauth/start": {
+      "post": {
+        "description": "For a connector that runs as a connected account: the provider’s consent URL (authorization code + PKCE, the connector’s scopes, a signed `state`) to open in a popup. The provider returns the browser to the public callback, which keeps the grant and posts `{ type: \"brain-source-oauth\", grantId, account }` to the `origin` named here. Connected accounts (docs/source-plane.md § Connected accounts): the brain as an outbound OAuth 2.1 client for the cloud connectors (gdrive, onedrive, dropbox). Answers a bare 404 until `SOURCE_PLANE_ENABLED=1` and `SOURCE_OAUTH_CLIENT=1`; needs `SOURCE_CREDENTIAL_ENCRYPTION_KEY` — tokens are never stored in the clear.\n\nRequired scope: `brain:admin`.",
+        "operationId": "startSourceOAuth",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceOAuthStartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceOAuthStartResponse"
+                }
+              }
+            },
+            "description": "Where to send the browser."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Begin connecting an account",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/preview": {
+      "post": {
+        "description": "With the config and credential about to be connected, list one page per chosen entity at the live vendor and show what the mapping makes of the first records — the facts, the relations, the fields left unmapped, the drops by name. Nothing is written. Records (docs/roadmap/crm-sources-2026-09.md): a CRM row enters as FACTS — its mapped attributes become deterministic candidates under the record’s own id, never prose a model re-extracts. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "previewSourceRecords",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordsPreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordsPreviewResponse"
+                }
+              }
+            },
+            "description": "The preview."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Preview a records connector before connecting",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/{id}": {
+      "delete": {
+        "description": "Deletes the connection and its catalogue rows. The documents, assets and facts they produced STAY (the facts-survive philosophy of pack uninstall): `deletePolicy` governs a source deleting an item, not an operator disconnecting a source. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "deleteSourceConnection",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "deleted": {
+                      "const": true,
+                      "type": "boolean"
+                    },
+                    "items": {
+                      "description": "Catalogue rows removed.",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "deleted",
+                    "items"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Disconnect a source",
+        "tags": [
+          "Source Plane"
+        ]
+      },
+      "get": {
+        "description": "The connection as listed. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "getSourceConnection",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceConnection"
+                }
+              }
+            },
+            "description": "The connection."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "One source connection",
+        "tags": [
+          "Source Plane"
+        ]
+      },
+      "patch": {
+        "description": "Partial update; `null` clears an optional field. `status` takes `active` | `paused` — a paused connection is skipped by the scheduler and by sync-now. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "updateSourceConnection",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSourceConnectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceConnection"
+                }
+              }
+            },
+            "description": "Updated."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Change a connection’s label, config, credential, schedule, policies or status",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/{id}/items": {
+      "get": {
+        "description": "One row per external item the connection has seen — identity by location (`externalId`), the revision last enumerated vs the one the stored content was fetched at, the document / asset / episode it produced, and its state (`seen` | `fetched` | `indexed` | `gone`). Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "listSourceItems",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only items in this state.",
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "enum": [
+                "seen",
+                "fetched",
+                "indexed",
+                "gone"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (default 50, max 500).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page offset.",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceItemsListResponse"
+                }
+              }
+            },
+            "description": "The catalogue page."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "The connection’s catalogue",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/{id}/items/{itemId}": {
+      "get": {
+        "description": "The item, the document it became (or the asset it was stored as and the parts the bridge made of it), the representations the processors extracted, and the facts that cite it with the revision each was read at, its stale mark and its close. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "inspectSourceItem",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The catalogue row id (`source_item:…`).",
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceItemInspectResponse"
+                }
+              }
+            },
+            "description": "The item and what it grounds."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "One catalogue row, followed to its facts",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/{id}/runs": {
+      "get": {
+        "description": "Every sync of the connection, newest first — queued, inline and agent runs alike, each a `source_sync` job_run projected to who ran it, its mode, counters, duration and error. `persisted: false` when JOB_RUN_PERSIST is off. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "listSourceConnectionRuns",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (default 20, max 200).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceRunsResponse"
+                }
+              }
+            },
+            "description": "The runs."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "The connection’s runs",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/{id}/stats": {
+      "get": {
+        "description": "Catalogue rows by state and the facts the connection grounds (active / stale per the drift sweep / closed by the delete policy). The fact count is a bounded scan; `facts` is null when the tenant was too large to count in time. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "getSourceConnectionStats",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceConnectionStats"
+                }
+              }
+            },
+            "description": "The counts."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "What the connection produced",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/{id}/sync": {
+      "post": {
+        "description": "Runs the engine over the connection: enumerate from the checkpoint (`full: true` re-walks everything and marks what is missing gone), diff against the catalogue, fetch every changed item by `contentPolicy` through the door for its shape, stamp the revision for the drift sweep, apply `deletePolicy` to what is gone. Default enqueues a `source_sync` job and returns its run id; `inline: true` runs it in the request and returns the summary. A re-run over an unchanged source is 0 fetches. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "syncSourceConnection",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncNowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncNowResponse"
+                }
+              }
+            },
+            "description": "Enqueued, or the inline summary."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Sync now",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/admin/source-connections/{id}/webhook": {
+      "delete": {
+        "description": "Forgets the secret; the public address answers 404 from here on. Records (docs/roadmap/crm-sources-2026-09.md): a CRM row enters as FACTS — its mapped attributes become deterministic candidates under the record’s own id, never prose a model re-extracts. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "disableSourceWebhook",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Off."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Switch a connection’s inbound webhook off",
+        "tags": [
+          "Source Plane"
+        ]
+      },
+      "post": {
+        "description": "Freshness for the records connectors (docs/roadmap/crm-sources-2026-09.md § 4.4): the address to register at the vendor (the tenant and the connection under an HMAC), the secret shown once (generated, or the vendor’s own — a Bitrix24 application token, a HubSpot app’s client secret), and the vendor’s how-to. Calling it again rotates the secret. Needs `SOURCE_WEBHOOKS=1` and `SOURCE_CREDENTIAL_ENCRYPTION_KEY`. Records (docs/roadmap/crm-sources-2026-09.md): a CRM row enters as FACTS — its mapped attributes become deterministic candidates under the record’s own id, never prose a model re-extracts. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:admin`.",
+        "operationId": "setupSourceWebhook",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookSetupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookSetupResponse"
+                }
+              }
+            },
+            "description": "The address, the secret (once) and the notes."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Switch a connection’s inbound webhook on",
+        "tags": [
+          "Source Plane"
         ]
       }
     },
@@ -8654,7 +13630,7 @@
     },
     "/v1/ingest/evidence-blob": {
       "post": {
-        "description": "Takes BYTES into custody: `multipart/form-data` with the content in the `file` part and the asset metadata as text parts. The server owns identity here — `byteHash` (sha256 of what it received), `byteLength` and `storageRef` are computed, never asserted — so the registered asset is blob-backed with availability derived as `hot`. Media types are an explicit conservative allowlist checked AGAINST the declared modality (application/json, application/pdf, audio/aac, audio/flac, audio/mp4, audio/mpeg, audio/ogg, audio/wav, image/avif, image/gif, image/jpeg, image/png, image/webp, text/csv, text/markdown, text/plain, video/mp4, video/quicktime, video/webm); anything else, including SVG, HTML, archives and `application/octet-stream`, is a 400. Transfer is capped at `min(EVIDENCE_MAX_BYTES, 64 MiB)` — an over-cap part is refused mid-upload with 413. Uploaded bytes are EXTERNAL INGEST by definition, so the asset registers with origin `external_ingest` and is SCANNED before it becomes dispatchable: a clean verdict answers 201, a rejection answers 422 with the row tombstoned and the bytes deleted, and a scan hook that cannot decide answers 201 with `quarantineStatus: \"scanning\"` (still dispatch-denied — the surface never fails open). An optional `packId` starts a FIRE-AND-FORGET processor dispatch that can never fail the upload. Same-user re-upload of identical bytes dedupes; a different principal gets a bare 409. Answers a bare 404 until `EVIDENCE_BLOB_UPLOAD_ENABLED=1` (raised before the body is parsed); answers 503 while `EVIDENCE_SUBSTRATE_ENABLED` or `EVIDENCE_QUARANTINE` is off, or when no storage adapter is configured. Source: src/evidence/evidence-ingest.controller.ts.\n\nRequired scope: `brain:write`.",
+        "description": "Takes BYTES into custody: `multipart/form-data` with the content in the `file` part and the asset metadata as text parts. The server owns identity here — `byteHash` (sha256 of what it received), `byteLength` and `storageRef` are computed, never asserted — so the registered asset is blob-backed with availability derived as `hot`. Media types are an explicit conservative allowlist checked AGAINST the declared modality (application/json, application/pdf, application/vnd.openxmlformats-officedocument.presentationml.presentation, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.wordprocessingml.document, audio/aac, audio/flac, audio/mp4, audio/mpeg, audio/ogg, audio/wav, image/avif, image/gif, image/jpeg, image/png, image/webp, message/rfc822, text/csv, text/markdown, text/plain, video/mp4, video/quicktime, video/webm); anything else, including SVG, HTML, archives and `application/octet-stream`, is a 400. Transfer is capped at `min(EVIDENCE_MAX_BYTES, 64 MiB)` — an over-cap part is refused mid-upload with 413. Uploaded bytes are EXTERNAL INGEST by definition, so the asset registers with origin `external_ingest` and is SCANNED before it becomes dispatchable: a clean verdict answers 201, a rejection answers 422 with the row tombstoned and the bytes deleted, and a scan hook that cannot decide answers 201 with `quarantineStatus: \"scanning\"` (still dispatch-denied — the surface never fails open). An optional `packId` starts a FIRE-AND-FORGET processor dispatch that can never fail the upload. Same-user re-upload of identical bytes dedupes; a different principal gets a bare 409. Answers a bare 404 until `EVIDENCE_BLOB_UPLOAD_ENABLED=1` (raised before the body is parsed); answers 503 while `EVIDENCE_SUBSTRATE_ENABLED` or `EVIDENCE_QUARANTINE` is off, or when no storage adapter is configured. Source: src/evidence/evidence-ingest.controller.ts.\n\nRequired scope: `brain:write`.",
         "operationId": "uploadEvidenceBlob",
         "requestBody": {
           "content": {
@@ -8681,7 +13657,7 @@
                     "type": "string"
                   },
                   "modality": {
-                    "description": "Drives pack consent, the dispatch gate and the fragment-locator matrix — the media type must be allowlisted FOR this modality: image → image/jpeg | image/png | image/gif | image/webp | image/avif; audio → audio/mpeg | audio/mp4 | audio/aac | audio/ogg | audio/wav | audio/flac; video → video/mp4 | video/webm | video/quicktime; document → application/pdf | text/plain | text/markdown | text/csv; sensor → application/json | text/csv.",
+                    "description": "Drives pack consent, the dispatch gate and the fragment-locator matrix — the media type must be allowlisted FOR this modality: image → image/jpeg | image/png | image/gif | image/webp | image/avif; audio → audio/mpeg | audio/mp4 | audio/aac | audio/ogg | audio/wav | audio/flac; video → video/mp4 | video/webm | video/quicktime; document → application/pdf | text/plain | text/markdown | text/csv | application/vnd.openxmlformats-officedocument.wordprocessingml.document | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet | application/vnd.openxmlformats-officedocument.presentationml.presentation | message/rfc822; sensor → application/json | text/csv.",
                     "enum": [
                       "image",
                       "audio",
@@ -9703,6 +14679,565 @@
         ]
       }
     },
+    "/v1/source-connections": {
+      "get": {
+        "description": "Every connection whose `host` is the given `agent:<id>`, each with the pack’s `sources[]` entry it instantiates (the connector kind, a stdio command, …) so the agent knows what to run. The local agent’s wire (docs/source-plane.md § Agent): the connector runs on the agent’s machine, the engine keeps the books here. Scope brain:write — a tenant write key, never an admin one; it reaches only the connections an operator pointed at its host (`host: agent:<id>`). Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:write`.",
+        "operationId": "listAgentSourceConnections",
+        "parameters": [
+          {
+            "description": "Required — `agent:<id>`.",
+            "in": "query",
+            "name": "host",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentConnectionsListResponse"
+                }
+              }
+            },
+            "description": "The agent’s connections."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "The connections pointed at this agent host",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/source-connections/agents/{agentId}": {
+      "put": {
+        "description": "Sent by the agent on every pass: its version, hostname, platform and the directories under its roots (names only, depth-bounded). Presence for the operator, an inventory for the folder picker. The local agent’s wire (docs/source-plane.md § Agent): the connector runs on the agent’s machine, the engine keeps the books here. Scope brain:write — a tenant write key, never an admin one; it reaches only the connections an operator pointed at its host (`host: agent:<id>`). Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:write`.",
+        "operationId": "agentCheckIn",
+        "parameters": [
+          {
+            "description": "The agent id (`agent:<id>` without the prefix).",
+            "in": "path",
+            "name": "agentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentInventory"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Recorded."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "summary": "Agent check-in: presence and the folders it can see",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/source-connections/oauth/callback": {
+      "get": {
+        "description": "Where a provider sends the browser after consent — the app’s registered redirect URI. Public by construction: the HMAC-signed `state` authenticates the request. Exchanges the code, keeps the grant, and answers a small HTML page that hands the result to the admin window that opened it and closes. No token, code or state appears in the page. Connected accounts (docs/source-plane.md § Connected accounts): the brain as an outbound OAuth 2.1 client for the cloud connectors (gdrive, onedrive, dropbox). Answers a bare 404 until `SOURCE_PLANE_ENABLED=1` and `SOURCE_OAUTH_CLIENT=1`; needs `SOURCE_CREDENTIAL_ENCRYPTION_KEY` — tokens are never stored in the clear.",
+        "operationId": "sourceOAuthCallback",
+        "parameters": [
+          {
+            "description": "The signed state the start call issued.",
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The authorization code.",
+            "in": "query",
+            "name": "code",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The provider’s error, when consent failed.",
+            "in": "query",
+            "name": "error",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The provider’s error text.",
+            "in": "query",
+            "name": "error_description",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The result page."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [],
+        "summary": "The provider’s return leg (public)",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/source-connections/webhook/{address}": {
+      "post": {
+        "description": "Where a CRM calls on change — the address the setup call handed out. Public by construction: the HMAC-signed address names the tenant and the connection, and the call is trusted the vendor’s way (HubSpot v3 signature, Pipedrive basic auth, Bitrix24 `auth[application_token]`, Kommo / custom `?token=` or `X-Brain-Signature`). The events name entity + id (+ deleted); the engine fetches those records through the records door as a queued `source_sync` job (202) — or inline without a queue (200, summary). The webhook never carries data into memory. 404 for an unknown address or a connection whose webhook is off; 401 for a call the scheme rejects. Records (docs/roadmap/crm-sources-2026-09.md): a CRM row enters as FACTS — its mapped attributes become deterministic candidates under the record’s own id, never prose a model re-extracts. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.",
+        "operationId": "receiveSourceWebhook",
+        "parameters": [
+          {
+            "description": "The signed address from the setup call.",
+            "in": "path",
+            "name": "address",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookReceipt"
+                }
+              }
+            },
+            "description": "Applied inline."
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookReceipt"
+                }
+              }
+            },
+            "description": "Queued."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [],
+        "summary": "The vendor’s call (public)",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/source-connections/{id}/agent-runs": {
+      "post": {
+        "description": "Opens one run (a `source_sync` job_run, actor `agent:<id>`) and answers with whether the walk must be full (first run, or requested), the checkpoint to resume from, the content policy and the fetch budget. One running agent run per connection — a second begin is 409. The local agent’s wire (docs/source-plane.md § Agent): the connector runs on the agent’s machine, the engine keeps the books here. Scope brain:write — a tenant write key, never an admin one; it reaches only the connections an operator pointed at its host (`host: agent:<id>`). Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:write`.",
+        "operationId": "beginAgentRun",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BeginAgentRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BeginAgentRunResponse"
+                }
+              }
+            },
+            "description": "The run."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "summary": "Begin an agent run",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/source-connections/{id}/agent-runs/{runId}/deltas": {
+      "post": {
+        "description": "Up to 1000 `upsert` / `gone` / `checkpoint` deltas from the agent’s walk, applied to the catalogue exactly as a server walk would be. The answer names the items whose revision moved — the ones the agent must now fetch and post. The local agent’s wire (docs/source-plane.md § Agent): the connector runs on the agent’s machine, the engine keeps the books here. Scope brain:write — a tenant write key, never an admin one; it reaches only the connections an operator pointed at its host (`host: agent:<id>`). Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:write`.",
+        "operationId": "postAgentRunDeltas",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The run id `begin` returned (a `source_sync` job_run).",
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentDeltasRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDeltasResponse"
+                }
+              }
+            },
+            "description": "What to fetch, and the batch’s counters."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "summary": "A batch of catalogue deltas",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/source-connections/{id}/agent-runs/{runId}/finish": {
+      "post": {
+        "description": "Closes the run: on `succeeded` a full walk marks what it did not see gone, the delete policy runs over everything gone since the run began, and the checkpoint is recorded; on `failed` the connection records the error. Returns the run summary (also the job_run result). The local agent’s wire (docs/source-plane.md § Agent): the connector runs on the agent’s machine, the engine keeps the books here. Scope brain:write — a tenant write key, never an admin one; it reaches only the connections an operator pointed at its host (`host: agent:<id>`). Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:write`.",
+        "operationId": "finishAgentRun",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The run id `begin` returned (a `source_sync` job_run).",
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinishAgentRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSyncSummary"
+                }
+              }
+            },
+            "description": "The run summary."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "summary": "Finish an agent run",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/source-connections/{id}/agent-runs/{runId}/items": {
+      "post": {
+        "description": "`{ externalId, item }` — the item in the connector seam’s shape (document text, binary as base64, conversation turns, a record envelope), handed to the door for its shape under the connection’s recorder and revision stamp. `skipped` when the content policy is `manifest` or the fetch budget is spent. The local agent’s wire (docs/source-plane.md § Agent): the connector runs on the agent’s machine, the engine keeps the books here. Scope brain:write — a tenant write key, never an admin one; it reaches only the connections an operator pointed at its host (`host: agent:<id>`). Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:write`.",
+        "operationId": "postAgentRunItem",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The run id `begin` returned (a `source_sync` job_run).",
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "externalId": {
+                    "type": "string"
+                  },
+                  "item": {
+                    "$ref": "#/components/schemas/FetchedItemWire"
+                  }
+                },
+                "required": [
+                  "externalId",
+                  "item"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentItemResponse"
+                }
+              }
+            },
+            "description": "The item’s outcome."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "summary": "One fetched item’s content",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
+    "/v1/source-connections/{id}/records": {
+      "post": {
+        "description": "A CRM’s outbound webhook, an automation (Make, n8n, Zapier, Albato) or a script posts a batch of records — `{ entityType, externalId, name, attributes, relations?, updatedAt? }` — plus the `<type>/<id>`s that are gone, under a connection of shape `structure`. Each batch is a `source_sync` run; an unchanged revision is not re-ingested; gone ids close their facts by the connection’s delete policy. Records (docs/roadmap/crm-sources-2026-09.md): a CRM row enters as FACTS — its mapped attributes become deterministic candidates under the record’s own id, never prose a model re-extracts. Source plane operator surface (docs/roadmap/raw-evidence-sources-2026-09.md) — answers a bare 404 until `SOURCE_PLANE_ENABLED=1`.\n\nRequired scope: `brain:write`.",
+        "operationId": "pushSourceRecords",
+        "parameters": [
+          {
+            "description": "Connection id (`source_connection:<tail>`; the bare tail is accepted).",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushRecordsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushRecordsResponse"
+                }
+              }
+            },
+            "description": "The batch’s outcome."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "summary": "Push record envelopes to a connection",
+        "tags": [
+          "Source Plane"
+        ]
+      }
+    },
     "/v1/sources": {
       "get": {
         "description": "Catalogue of everything brain knows ABOUT its fact sources: the operator-declared identity (type, authLevel) joined with the learned agreement rates, one row per sourceKey. Public projection — operator annotations (owner/note) are served only on the brain:admin surface. `domain` additionally captures that domain's learned rate into `domainTrust` and makes `minSamples` judge it (falling back to the global row). Source: src/sources/public-sources.controller.ts.\n\nRequired scope: `brain:read`.",
@@ -10003,6 +15538,10 @@
     {
       "description": "Read-only trust inputs (scope `brain:read`): declared source identity ⋈ learned reputation. Public projection — operator annotations (owner/note) stay on the admin surface.",
       "name": "Sources"
+    },
+    {
+      "description": "Where brain READS raw evidence from (scope `brain:admin`): connections that instantiate a pack’s declared `sources` entry, the per-connection catalogue of external items, and the sync engine. Flag: `SOURCE_PLANE_ENABLED`.",
+      "name": "Source Plane"
     },
     {
       "description": "The raw-substrate driver: verbatim pre-extraction dialogue turns (L0) as a contract — keyset reads, NDJSON export, and signed new-episode webhooks — so any consumer can build its own projection without touching our database. Flags: EPISODES_API_ENABLED / EPISODE_SUBSCRIPTIONS_ENABLED (off → 404).",

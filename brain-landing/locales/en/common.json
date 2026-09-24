@@ -599,10 +599,22 @@
         "invalidJson": "Manifest is not valid JSON."
       },
       "consent": {
-        "title": "Pack declares MCP tools",
-        "note": "Installing changes this tenant's agent surface; external tools cause signed outbound calls to the publisher's endpoint. Review the declaration:",
-        "accept": "Accept MCP tools and install",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "acceptMcpTools": {
+          "title": "Pack declares MCP tools",
+          "note": "Installing changes this tenant's agent surface; external tools cause signed outbound calls to the publisher's endpoint. Review the declaration:",
+          "accept": "Accept MCP tools and install"
+        },
+        "acceptModalities": {
+          "title": "Pack declares media modalities",
+          "note": "The pack asks to receive raw evidence (images, audio, documents) and to run processors over it. Review the declaration:",
+          "accept": "Accept modalities and install"
+        },
+        "acceptSources": {
+          "title": "Pack declares sources",
+          "note": "The pack names external systems the brain may READ through a connection (folders, buckets, sites, MCP servers). Nothing is read until an operator connects one. Review the declaration:",
+          "accept": "Accept sources and install"
+        }
       },
       "payment": {
         "title": "Payment required",
@@ -623,6 +635,1381 @@
         "webhookNote": "Store it now: this HMAC secret signs indexer pushes and external MCP tool calls. It will NOT be shown again.",
         "copy": "Copy",
         "copied": "copied"
+      }
+    },
+    "connections": {
+      "title": "Connections",
+      "subtitle": "The source plane: where the brain reads existing evidence from. A connection instantiates one `sources` entry of an installed pack — folders, buckets, sites, MCP servers — catalogues what is there, fetches what changed and commits it through the ordinary doors with a revision on every fact.",
+      "off": {
+        "title": "Source plane is off",
+        "body": "This deployment answers 404 on /v1/admin/source-connections. Set SOURCE_PLANE_ENABLED=1 (and SOURCE_KIND_<KIND>=1 per connector) and restart; the scheduler registers at boot."
+      },
+      "tabs": {
+        "connections": "Connected",
+        "catalog": "Add a source",
+        "agents": "Local agents",
+        "accounts": "Accounts"
+      },
+      "groups": {
+        "files": {
+          "title": "Files",
+          "body": "Documents and files where they already live — a folder on the brain’s host or a laptop, an S3 bucket, Google Drive, OneDrive, Dropbox."
+        },
+        "web": {
+          "title": "Web",
+          "body": "Sites read over HTTP — a documentation portal, a wiki, the company site — page by page from a sitemap or a crawl."
+        },
+        "mail": {
+          "title": "Mail",
+          "body": "Mailboxes read as conversations — every message one turn of its thread, attachments to the evidence plane — a Gmail account or any mailbox over IMAP."
+        },
+        "chat": {
+          "title": "Chat",
+          "body": "Channels and groups as conversations — every message one turn of its channel or thread — a Slack workspace, or a Telegram bot in your groups."
+        },
+        "mcp": {
+          "title": "MCP servers",
+          "body": "Resources an MCP server serves — a wiki, a knowledge base, a CMS behind an MCP endpoint — signed in as an account when the server asks."
+        },
+        "code": {
+          "title": "Code",
+          "body": "Committed documentation of a repository, read on the machine that has the clone."
+        },
+        "records": {
+          "title": "CRM & records",
+          "body": "People, organizations and deals of a CRM as facts — read from the vendor’s API, or from any REST API you describe."
+        },
+        "external": {
+          "title": "Pushed in",
+          "body": "An indexer or tool pushes here through the doors; connecting only creates the identity its writes are attributed to."
+        },
+        "other": {
+          "title": "Other",
+          "body": "Kinds this build names but the page does not know how to draw."
+        }
+      },
+      "fences": {
+        "title": "Deployment fences",
+        "connectors": "connectors",
+        "connectorOff": "off — set {flag}=1",
+        "fsRoots": "fs root jail",
+        "fsRootsNone": "none — SOURCE_FS_ROOTS unset, no directory may be read",
+        "egress": "private egress",
+        "egressOn": "operator opt-in on (SOURCE_EGRESS_ALLOW_PRIVATE) — a connection still needs config.allowPrivate",
+        "egressOff": "public hosts only (loopback / private / link-local refused)"
+      },
+      "list": {
+        "title": "Connected",
+        "subtitle": "Connections in this tenant. Sync enqueues a job; Full re-walks everything and marks what is missing gone.",
+        "headers": {
+          "label": "connection",
+          "source": "what",
+          "connector": "where",
+          "host": "host",
+          "schedule": "schedule",
+          "status": "status",
+          "lastSync": "last sync",
+          "actions": "actions"
+        },
+        "empty": "No connections yet — open “Add a source”.",
+        "filter": "filter by name, pack, source…",
+        "addSource": "Add a source",
+        "noMatch": "Nothing matches the filter.",
+        "pausedCount": "{n} paused",
+        "failedCount": "{n} failing",
+        "personal": "personal",
+        "neverSynced": "never",
+        "sync": "Sync",
+        "full": "Full",
+        "pause": "Pause",
+        "resume": "Resume",
+        "inspect": "Inspect",
+        "delete": "Delete",
+        "deletePrompt": "Delete connection \"{label}\" — its catalogue is dropped, the documents and facts it committed stay. Type the label to confirm.",
+        "confirmMismatch": "Confirmation phrase mismatch — aborting.",
+        "deleted": "Deleted {label}: {n} catalogue item(s) dropped.",
+        "enqueued": "Sync enqueued as job {runId}.",
+        "alreadyQueued": "A sync for this connection is already queued ({runId})."
+      },
+      "status": {
+        "active": "active",
+        "paused": "paused",
+        "deleting": "deleting"
+      },
+      "detail": {
+        "title": "Connection",
+        "id": "id",
+        "sourceKey": "source key",
+        "recorder": "recorder",
+        "vertical": "vertical",
+        "mode": "mode",
+        "contentPolicy": "content",
+        "deletePolicy": "on delete",
+        "fetchBudget": "fetch budget",
+        "credential": "credential",
+        "credentialStored": "stored (never shown)",
+        "credentialNone": "none",
+        "credentialAccount": "connected account",
+        "config": "config",
+        "checkpoint": "checkpoint",
+        "lastError": "last error",
+        "runInline": "Run inline",
+        "runInlineHint": "Runs the sync in this request and shows the counters — for watching a first sync of a small source.",
+        "running": "syncing…",
+        "summary": {
+          "title": "Sync result",
+          "seen": "seen",
+          "new": "new",
+          "changed": "changed",
+          "unchanged": "unchanged",
+          "gone": "gone",
+          "fetched": "fetched",
+          "ingested": "ingested",
+          "deduplicated": "deduplicated",
+          "failed": "failed",
+          "closed": "closed",
+          "duration": "{ms} ms",
+          "skipped": "skipped: {reason}"
+        },
+        "close": "Close",
+        "host": "runs on",
+        "hostServer": "brain",
+        "hostAgent": "local agent {agentId}",
+        "source": "source entry",
+        "sourceUnknown": "the pack no longer declares this source",
+        "openJobs": "all source_sync jobs"
+      },
+      "items": {
+        "title": "Catalogue",
+        "subtitle": "What the connection has seen at the source ({total} items).",
+        "all": "all",
+        "headers": {
+          "item": "item",
+          "state": "state",
+          "revision": "revision",
+          "size": "size",
+          "lastSeen": "last seen",
+          "error": "error"
+        },
+        "empty": "Nothing catalogued yet — run a sync.",
+        "prev": "previous",
+        "next": "next",
+        "state": {
+          "seen": "seen",
+          "fetched": "fetched",
+          "indexed": "indexed",
+          "gone": "gone"
+        }
+      },
+      "catalog": {
+        "title": "Connect a source",
+        "subtitle": "What the packs installed here can read. Pick what you have; the brain asks the rest.",
+        "headers": {
+          "pack": "pack",
+          "source": "source",
+          "connector": "connector · shape",
+          "availability": "availability",
+          "actions": "actions"
+        },
+        "builtin": "builtin",
+        "notAccepted": "sources not accepted — reinstall the pack with acceptSources",
+        "reinstall": "open Packs",
+        "connect": "Connect",
+        "all": "All",
+        "empty": "No pack in this tenant declares sources. Install file_memory or web_memory from Packs (accept modalities + sources).",
+        "availability": {
+          "ready": "ready",
+          "disabled": "switched off",
+          "missing": "not shipped",
+          "agent": "local agent",
+          "external": "publisher pushes"
+        },
+        "availabilityHint": {
+          "ready": "the connector is installed and on",
+          "disabled": "installed, off — set {flag}=1",
+          "missing": "this build ships no such connector",
+          "agent": "runs on a local agent (brain-agent) — Connect asks for the agent id",
+          "external": "the publisher pushes through the doors; the connection is only the identity pushes are attributed to"
+        }
+      },
+      "create": {
+        "title": "Connect: {title}",
+        "submit": "Connect",
+        "submitting": "connecting…",
+        "cancel": "Cancel",
+        "created": "Connected {label}. Run Sync to catalogue it.",
+        "createdBoth": "Connected {label} — documents and files."
+      },
+      "stats": {
+        "title": "Produced",
+        "hint": "Catalogue rows by state and the facts this connection grounds (source.meta.source_connection). Stale = the source moved past the revision a fact was read at; closed = the delete policy ended it.",
+        "items": "catalogue",
+        "facts": "facts",
+        "active": "active",
+        "stale": "stale",
+        "closed": "closed",
+        "factsUnknown": "too many to count in time",
+        "loading": "counting…"
+      },
+      "runs": {
+        "title": "Runs",
+        "subtitle": "Every sync of this connection — queued, inline and agent runs alike, each a source_sync job.",
+        "headers": {
+          "started": "started",
+          "ranBy": "ran by",
+          "trigger": "trigger",
+          "mode": "mode",
+          "status": "status",
+          "counters": "seen · new · changed · gone · fetched · ingested · failed · closed",
+          "duration": "duration",
+          "job": "job"
+        },
+        "empty": "No runs yet.",
+        "notPersisted": "JOB_RUN_PERSIST is off — runs leave no history.",
+        "server": "brain",
+        "openJob": "open",
+        "skipped": "skipped: {reason}",
+        "more": "showing the latest {n}"
+      },
+      "item": {
+        "title": "Item",
+        "openHint": "click a row to follow it to its document, asset and facts",
+        "close": "Close",
+        "identity": "at the source",
+        "externalId": "external id",
+        "origin": "origin",
+        "path": "path",
+        "mediaType": "media type",
+        "size": "size",
+        "revision": "revision (enumerated)",
+        "fetchedRevision": "revision (fetched)",
+        "modifiedAt": "modified at source",
+        "firstSeen": "first seen",
+        "lastSeen": "last seen",
+        "goneAt": "gone at",
+        "error": "last error",
+        "episode": "episode",
+        "turn": "the turn",
+        "turnFields": {
+          "speaker": "speaker",
+          "conversation": "conversation",
+          "messageId": "message id",
+          "at": "at"
+        },
+        "documents": "documents",
+        "documentsNone": "no document yet — the item was not fetched, or a processor still has to extract its text",
+        "documentsNoneTurn": "no document — a message is a turn of its conversation, not a document; its facts come from the turn",
+        "document": {
+          "kind": "kind",
+          "status": "status",
+          "created": "created"
+        },
+        "asset": "evidence asset",
+        "assetNone": "—",
+        "assetFields": {
+          "mediaType": "media type",
+          "modality": "modality",
+          "bytes": "bytes",
+          "availability": "availability",
+          "quarantine": "quarantine"
+        },
+        "representations": "extracted representations",
+        "representationsNone": "none yet — no processor has run over this asset (EVIDENCE_PROCESSOR_BROKER, and a pack that names the modality)",
+        "representation": {
+          "kind": "kind",
+          "producer": "producer",
+          "chars": "chars",
+          "created": "created"
+        },
+        "facts": "facts this item grounds",
+        "factsEmpty": "No facts cite this item.",
+        "factsTruncated": "more facts than shown — open the entity to see the rest",
+        "factHeaders": {
+          "predicate": "predicate",
+          "object": "object",
+          "version": "read at revision",
+          "state": "state"
+        },
+        "factState": {
+          "current": "current",
+          "drifted": "drifted",
+          "stale": "stale",
+          "closed": "closed",
+          "retracted": "{status}"
+        },
+        "driftHint": "read at an older revision than the catalogue now holds — the drift sweep marks it stale on its next pass"
+      },
+      "agents": {
+        "title": "Local agents",
+        "subtitle": "Connections that run on an agent — a laptop, a CI runner, a machine in the LAN. The brain keeps the books; the agent walks the source and posts what changed.",
+        "headers": {
+          "agent": "agent",
+          "connections": "connections",
+          "lastSync": "last activity",
+          "status": "last status",
+          "seen": "checked in"
+        },
+        "never": "never checked in",
+        "setup": "Run the agent on that machine",
+        "setupHint": "Install once; the service syncs every 5 minutes and survives reboots. Needs Node 20+ and, for repositories, git.",
+        "copy": "copy",
+        "copied": "copied",
+        "none": "No agent-host connections. Pick a source with availability \"local agent\" in the catalogue, or choose \"local agent\" when connecting.",
+        "setupNew": "Set up an agent",
+        "issueKey": "New key",
+        "installHint": "Install with a key: press \"New key\" — the command comes back with the key filled in.",
+        "modal": {
+          "title": "Agent {agentId}",
+          "agentId": "Agent id",
+          "agentIdHint": "How the brain will know this machine; the connections you point at it use this id.",
+          "roots": "Folders it may read",
+          "rootsHint": "Optional ':'-separated allowlist for the folder connector on that machine (BRAIN_AGENT_ROOTS); empty = anything the user can read.",
+          "keyExplain": "Issues a brain:write key of this tenant labelled agent:<id> — a write key, never an admin one. You will see it once.",
+          "issue": "Issue a key",
+          "issuing": "Issuing…",
+          "keyOnce": "This key is shown once. Run the command on the agent's machine now, or copy it somewhere safe.",
+          "install": "On a laptop or a server — as a service",
+          "installHint": "Saves the config (owner-only) and registers a launchd agent on macOS / a systemd user unit on Linux; it syncs every 5 minutes. brain-agent status / doctor / uninstall afterwards.",
+          "ci": "One-shot (CI, cron)",
+          "ciHint": "No file is written; the key rides in the environment. Exit 2 when a connection failed.",
+          "keyRecord": "Key {name} ({prefix}…) — revoke it under Key Lens if the machine is gone.",
+          "done": "Done"
+        },
+        "seenNever": "never checked in",
+        "seenAt": "{at} · {hostname} · {platform} · v{version}",
+        "roots": "can see",
+        "databases": "databases"
+      },
+      "form": {
+        "steps": {
+          "where": "Where it runs",
+          "source": "The source",
+          "sync": "How it syncs"
+        },
+        "next": "Next",
+        "back": "Back",
+        "connect": "Connect",
+        "connecting": "Connecting…",
+        "advanced": "Advanced",
+        "advancedHide": "Hide advanced",
+        "editJson": "Edit as JSON",
+        "editForm": "Back to the form",
+        "jsonHint": "The exact config the brain receives. Editing here overrides the form.",
+        "invalidJson": "config is not valid JSON.",
+        "noForm": "This build has no form for the \"{connector}\" connector yet — fill the config as JSON.",
+        "host": {
+          "serverTitle": "On the brain",
+          "serverBody": "The brain reads the source itself: a mounted volume, a bucket, a site, an MCP server it can reach.",
+          "agentTitle": "On a local agent",
+          "agentBody": "A brain-agent on a laptop, a CI runner or a machine in the LAN walks the source there and posts what changed; the brain keeps the books.",
+          "serverOnly": "This source runs on the brain.",
+          "agentOnly": "This source runs on a local agent only."
+        },
+        "agentId": "Agent id",
+        "agentIdHint": "The id the agent runs with (BRAIN_AGENT_ID / --agent; default: its hostname). You get the run command after connecting.",
+        "label": "Name",
+        "labelHint": "How this connection shows up here; defaults to pack/source.",
+        "external": "The publisher pushes through the doors; this connection is only the identity pushes are attributed to. Nothing to configure.",
+        "stdio": "The agent spawns the pack's server:",
+        "pinnedUrl": "Server",
+        "pinnedUrlHint": "pinned by the pack — the brain reads it, the operator cannot change it",
+        "installSecret": "The brain authenticates with the pack's install secret; nothing to enter.",
+        "oauth": "This server signs in: the brain discovers its authorization server, registers itself there and asks you to consent — pick or connect the account below.",
+        "credential": {
+          "title": "Credential",
+          "single": "Token",
+          "singleHint": "Stored write-only; never shown again.",
+          "keyId": "Access key id",
+          "keySecret": "Secret access key",
+          "pairHint": "Leave both empty to use the brain's own credential chain (env / instance role).",
+          "account": "Account",
+          "accountHint": "The brain reads the source as this account; its tokens stay encrypted on the brain.",
+          "pickAccount": "Use a connected account",
+          "connectNew": "Connect a {provider} account",
+          "connectAnother": "Connect another account",
+          "connecting": "Waiting for {provider}…",
+          "popupBlocked": "The sign-in window was blocked — allow popups for this site and try again.",
+          "noAccounts": "No {provider} account connected yet.",
+          "notConfigured": "This brain has no {provider} app registered — set {flag} (and the redirect URI below) on the brain.",
+          "redirectUri": "Redirect URI to register at {provider}: {uri}",
+          "keyMissing": "The brain has no SOURCE_CREDENTIAL_ENCRYPTION_KEY — tokens are never stored in the clear, so no account can be connected until it is set.",
+          "scopesShort": "This account was connected with narrower permissions; connect it again.",
+          "token": "or an API token",
+          "tokenHint": "Pasted once, stored encrypted; a connected account is preferred where the vendor offers one.",
+          "webhookUrl": "Inbound webhook URL",
+          "webhookUrlHint": "https://<portal>.bitrix24.ru/rest/<user>/<code>/ — made in Developer resources → Other → Inbound webhook, scope crm (+ user for owner names). The code is the secret: stored encrypted, never shown again.",
+          "webhookUrlAlt": "or an inbound webhook URL (one portal, no app)",
+          "longLivedToken": "Long-lived token",
+          "longLivedTokenHint": "From the private integration in Settings → Integrations (valid for years). Stored encrypted, never shown again.",
+          "longLivedTokenAlt": "or a long-lived token (private integration)",
+          "botTokenAlt": "or a bot token (xoxb-…) of an app already installed",
+          "botTokenAltHint": "Pasted once, stored encrypted. The app still needs its bot scopes and an /invite into each channel.",
+          "botToken": "Bot token",
+          "botTokenHint": "From @BotFather (123456:ABC-…). Give the bot the group and turn its privacy mode off (or make it an admin) so it sees the messages. Stored encrypted, never shown again.",
+          "password": "Password",
+          "passwordHint": "The mailbox password — an app password where the provider issues one (Gmail, Outlook, Yandex). Stored encrypted, never shown again.",
+          "jwtBearer": "or a JWT bearer (integration user)",
+          "jwtBearerHint": "Paste a JSON { \"clientId\": \"<consumer key>\", \"username\": \"<integration user>\", \"privateKey\": \"-----BEGIN PRIVATE KEY-----…\", \"loginUrl\"?: \"https://test.salesforce.com\" } — the connected app must carry the certificate of that key and pre-authorize the user. No browser, no refresh token; stored encrypted, never shown again.",
+          "mcpHint": "The brain signs in at the server itself (RFC 9728 discovery, dynamic registration, PKCE); the grant is bound to this server.",
+          "mcpOff": "MCP sign-in is off on this brain — set {flag}=1.",
+          "mcpNoServer": "Name the server URL above first.",
+          "mcpClient": "Registered client (only when the server offers no dynamic registration)",
+          "mcpClientId": "client id",
+          "mcpClientSecret": "client secret (if any)"
+        },
+        "errors": {
+          "required": "required",
+          "path": "an absolute path",
+          "url": "an http(s) URL",
+          "number": "a number ≥ {min}",
+          "credential": "a credential is needed for this auth",
+          "header": "name the header",
+          "jail": "must be under one of: {roots}",
+          "account": "connect an account first",
+          "jwtBearer": "a JSON with clientId, username and a PEM privateKey",
+          "identifier": "SQL identifiers only (letters, digits, _; table or schema.table); relations as kind = column → type"
+        },
+        "fields": {
+          "fs": {
+            "root": {
+              "label": "Folder",
+              "hint": "Absolute path on the brain host."
+            },
+            "rootAgent": {
+              "label": "Folder",
+              "hint": "Absolute path on the agent's machine (inside BRAIN_AGENT_ROOTS if the agent sets it)."
+            },
+            "include": {
+              "label": "Only these paths",
+              "hint": "gitignore-style, one per line, relative to the folder: docs/** — everything under docs; notes/2026 — that folder; *.md — every markdown file at any depth; /README.md — the root's only. Empty = the whole folder."
+            },
+            "exclude": {
+              "label": "Skip these paths",
+              "hint": "Same dialect: docs/archive — that folder; drafts/ — any folder named drafts; *.log — every log file. Applied after \"only these\"."
+            },
+            "extensions": {
+              "label": "Extensions",
+              "hint": "Comma-separated, no dots; empty = the shape's defaults."
+            },
+            "ignoreFiles": {
+              "label": "Ignore files honoured in the tree",
+              "hint": "The machine's owner can leave a .brainignore (gitignore syntax, nested files allowed) anywhere under the folder to keep things out without touching this connection. Add .gitignore to also skip what git skips."
+            },
+            "excludeDirs": {
+              "label": "Skip directories",
+              "hint": "Directory names skipped anywhere in the tree."
+            },
+            "includeHidden": {
+              "label": "Include hidden entries",
+              "hint": "Leading-dot files and folders."
+            },
+            "maxFiles": {
+              "label": "Max files",
+              "hint": "Walk stops here."
+            },
+            "maxFileBytes": {
+              "label": "Max file size (bytes)",
+              "hint": "Larger files are skipped."
+            }
+          },
+          "url": {
+            "urls": {
+              "label": "Pages",
+              "hint": "One URL per line — read as they are."
+            },
+            "sitemaps": {
+              "label": "Sitemaps",
+              "hint": "One per line; every page they list is read (indexes followed one level)."
+            },
+            "sameHostOnly": {
+              "label": "Same host only",
+              "hint": "Ignore sitemap entries on other hosts."
+            },
+            "maxPages": {
+              "label": "Max pages",
+              "hint": "Per sync."
+            },
+            "authScheme": {
+              "label": "Authentication",
+              "hint": ""
+            },
+            "authHeader": {
+              "label": "Header name",
+              "hint": "The header the token is sent in."
+            },
+            "refetchHours": {
+              "label": "Re-read every (hours)",
+              "hint": "For pages without ETag / Last-Modified."
+            },
+            "delayMs": {
+              "label": "Delay between requests (ms)",
+              "hint": ""
+            },
+            "maxBytes": {
+              "label": "Max page size (bytes)",
+              "hint": ""
+            },
+            "ignoreRobots": {
+              "label": "Ignore robots.txt",
+              "hint": "Only for a site you operate."
+            },
+            "allowPrivate": {
+              "label": "Allow private hosts",
+              "hint": "Loopback / LAN addresses — the deployment already opted in."
+            }
+          },
+          "notion": {
+            "rootPageIds": {
+              "label": "Only under these pages",
+              "hint": "Page ids (from a page’s URL or “Copy link”), one per line — their subtrees are walked instead of everything the integration can see. Empty = everything shared with the integration."
+            },
+            "maxPages": {
+              "label": "Max pages",
+              "hint": "Default 5000."
+            },
+            "maxBlocks": {
+              "label": "Max blocks per page",
+              "hint": "The block tree is cut there. Default 2000."
+            }
+          },
+          "gmail": {
+            "query": {
+              "label": "Gmail query",
+              "hint": "Gmail search syntax narrowing what is read (label:clients -category:promotions). Empty = everything."
+            },
+            "labelIds": {
+              "label": "Labels",
+              "hint": "Label ids every message must carry, one per line (INBOX, SENT, a user label’s id). Empty = any."
+            },
+            "since": {
+              "label": "Since",
+              "hint": "The first walk reads mail after this date (YYYY-MM-DD). Default: 90 days back."
+            },
+            "maxMessages": {
+              "label": "Max messages per run",
+              "hint": "Newest first. Default 2000."
+            },
+            "includeSpamTrash": {
+              "label": "Include spam and trash",
+              "hint": ""
+            },
+            "extensions": {
+              "label": "Attachment types",
+              "hint": "Attachments entry only: extensions admitted, comma or line separated. Empty = PDFs, office documents, images."
+            },
+            "maxFileBytes": {
+              "label": "Max attachment size (bytes)",
+              "hint": "Attachments entry only. Default 8 MB."
+            }
+          },
+          "github": {
+            "repo": {
+              "label": "Repository",
+              "hint": "owner/name — the repository the token or the connected account can read."
+            },
+            "since": {
+              "label": "Since",
+              "hint": "Issues entry: the first walk reads what changed after this date (YYYY-MM-DD). Default: 180 days back."
+            },
+            "includePullRequests": {
+              "label": "Include pull requests",
+              "hint": "GitHub lists a pull request as an issue; off reads issues only."
+            },
+            "labels": {
+              "label": "Labels",
+              "hint": "Issues entry: only issues carrying every one of these labels, one per line. Empty = all."
+            },
+            "paths": {
+              "label": "Only under these paths",
+              "hint": "Docs entry: path prefixes (docs/, adr/), one per line. Empty = the whole tree."
+            },
+            "ref": {
+              "label": "Branch or tag",
+              "hint": "Docs entry; empty = the repository’s default branch."
+            },
+            "baseUrl": {
+              "label": "GitHub Enterprise API",
+              "hint": "https://ghe.example.com/api/v3 — empty for github.com."
+            },
+            "extensions": {
+              "label": "Extensions",
+              "hint": "Docs entry: which files are text. Empty = the standard table (md, txt, adoc, rst, code, …)."
+            },
+            "maxItems": {
+              "label": "Max issues per run",
+              "hint": "Newest change first. Default 1000."
+            },
+            "maxFiles": {
+              "label": "Max files",
+              "hint": "Docs entry. Default 5000."
+            },
+            "maxFileBytes": {
+              "label": "Max file size (bytes)",
+              "hint": "Docs entry. Default 1 MB."
+            },
+            "allowPrivate": {
+              "label": "Allow private hosts",
+              "hint": "A GitHub Enterprise host inside your network — the deployment already opted in."
+            }
+          },
+          "slack": {
+            "channels": {
+              "label": "Channels",
+              "hint": "Channel names or ids, one per line. Empty = every channel the app is a member of. Invite it first: /invite @your-app."
+            },
+            "since": {
+              "label": "Since",
+              "hint": "The first walk reads messages after this date (YYYY-MM-DD). Default: 30 days back."
+            },
+            "includeThreads": {
+              "label": "Follow threads",
+              "hint": "Replies land in the same conversation as their root."
+            },
+            "maxMessages": {
+              "label": "Max messages per channel per run",
+              "hint": "Newest first. Default 2000."
+            }
+          },
+          "telegram": {
+            "chats": {
+              "label": "Chats",
+              "hint": "Chat ids, @usernames or titles, one per line. Empty = every chat the bot is in."
+            },
+            "maxMessages": {
+              "label": "Max updates per run",
+              "hint": "Default 2000."
+            }
+          },
+          "imap": {
+            "host": {
+              "label": "IMAP host",
+              "hint": "imap.gmail.com, outlook.office365.com, imap.yandex.ru, or your own server."
+            },
+            "port": {
+              "label": "Port",
+              "hint": "993 with TLS (default), 143 without."
+            },
+            "tls": {
+              "label": "TLS",
+              "hint": "Off only for a server on your own network under the private opt-in — STARTTLS is not spoken."
+            },
+            "user": {
+              "label": "User",
+              "hint": "The login, usually the address."
+            },
+            "mailboxes": {
+              "label": "Mailboxes",
+              "hint": "One per line; INBOX when empty. Plain ASCII names only."
+            },
+            "since": {
+              "label": "Since",
+              "hint": "The first walk reads mail after this date (YYYY-MM-DD). Default: 90 days back."
+            },
+            "maxMessages": {
+              "label": "Max messages per mailbox per run",
+              "hint": "Newest first. Default 2000."
+            },
+            "allowPrivate": {
+              "label": "Allow private hosts",
+              "hint": "Loopback / LAN addresses (and a plain socket without TLS) — the deployment already opted in."
+            }
+          },
+          "confluence": {
+            "spaceKeys": {
+              "label": "Spaces",
+              "hint": "Space keys, one per line (ENG, OPS). Empty = every space the account can read."
+            },
+            "site": {
+              "label": "Site",
+              "hint": "acme.atlassian.net — only when the account reaches several sites."
+            },
+            "includeBlogposts": {
+              "label": "Include blog posts",
+              "hint": ""
+            },
+            "maxPages": {
+              "label": "Max pages",
+              "hint": "Default 5000."
+            }
+          },
+          "s3": {
+            "bucket": {
+              "label": "Bucket",
+              "hint": ""
+            },
+            "prefix": {
+              "label": "Prefix",
+              "hint": "Only keys under it."
+            },
+            "region": {
+              "label": "Region",
+              "hint": ""
+            },
+            "endpoint": {
+              "label": "Endpoint",
+              "hint": "For MinIO / R2 / B2; empty = AWS."
+            },
+            "forcePathStyle": {
+              "label": "Path-style addressing",
+              "hint": "Most self-hosted S3 need it."
+            },
+            "extensions": {
+              "label": "Extensions",
+              "hint": "Comma-separated, no dots."
+            },
+            "maxObjects": {
+              "label": "Max objects",
+              "hint": ""
+            },
+            "maxObjectBytes": {
+              "label": "Max object size (bytes)",
+              "hint": ""
+            },
+            "allowPrivate": {
+              "label": "Allow a private endpoint",
+              "hint": "Loopback / LAN addresses — the deployment already opted in."
+            }
+          },
+          "mcp": {
+            "url": {
+              "label": "Server URL",
+              "hint": "The MCP endpoint (https)."
+            },
+            "authScheme": {
+              "label": "Authentication",
+              "hint": ""
+            },
+            "authHeader": {
+              "label": "Header name",
+              "hint": ""
+            },
+            "uriPrefixes": {
+              "label": "Resource URI prefixes",
+              "hint": "Keep only resources whose URI starts with one of these; empty = all."
+            },
+            "mimeTypes": {
+              "label": "MIME types",
+              "hint": "Prefix match (text/); empty = all."
+            },
+            "maxResources": {
+              "label": "Max resources",
+              "hint": ""
+            },
+            "maxBytes": {
+              "label": "Max text per resource (bytes)",
+              "hint": ""
+            },
+            "refetchHours": {
+              "label": "Re-read every (hours)",
+              "hint": "For resources without lastModified."
+            },
+            "allowPrivate": {
+              "label": "Allow a private host",
+              "hint": "Loopback / LAN addresses — the deployment already opted in."
+            }
+          },
+          "git": {
+            "repo": {
+              "label": "Repository",
+              "hint": "Absolute path on the agent's machine (a clone, or the CI checkout)."
+            },
+            "ref": {
+              "label": "Ref",
+              "hint": "Branch, tag or commit; empty = HEAD."
+            },
+            "include": {
+              "label": "Include",
+              "hint": "One prefix or glob per line (docs/**, README.md, adr/????-*.md); empty = everything."
+            },
+            "extensions": {
+              "label": "Extensions",
+              "hint": "Empty = the docs extensions."
+            },
+            "maxFiles": {
+              "label": "Max files",
+              "hint": ""
+            },
+            "maxFileBytes": {
+              "label": "Max file size (bytes)",
+              "hint": ""
+            }
+          },
+          "gdrive": {
+            "folderId": {
+              "label": "Folder",
+              "hint": "A folder id from its URL, or root — My Drive. Everything beneath it."
+            },
+            "includeShared": {
+              "label": "Also what is shared with me",
+              "hint": ""
+            },
+            "driveId": {
+              "label": "Shared drive id",
+              "hint": "Read a shared drive instead of My Drive."
+            },
+            "extensions": {
+              "label": "Extensions",
+              "hint": "Comma-separated, no dots; empty = the shape's defaults. Google Docs / Sheets / Slides are always taken."
+            },
+            "maxFiles": {
+              "label": "Max files",
+              "hint": ""
+            },
+            "maxFileBytes": {
+              "label": "Max file size (bytes)",
+              "hint": ""
+            }
+          },
+          "onedrive": {
+            "folderPath": {
+              "label": "Folder",
+              "hint": "Path under the drive root, e.g. /Documents/Team; empty = the whole drive."
+            },
+            "siteId": {
+              "label": "SharePoint site id",
+              "hint": "Read a site's default document library instead of the account's OneDrive."
+            },
+            "driveId": {
+              "label": "Drive id",
+              "hint": "A specific drive (a group's, a colleague's)."
+            },
+            "extensions": {
+              "label": "Extensions",
+              "hint": "Comma-separated, no dots; empty = the shape's defaults."
+            },
+            "maxFiles": {
+              "label": "Max files",
+              "hint": ""
+            },
+            "maxFileBytes": {
+              "label": "Max file size (bytes)",
+              "hint": ""
+            }
+          },
+          "dropbox": {
+            "path": {
+              "label": "Folder",
+              "hint": "/Folder/Sub; empty = the whole Dropbox."
+            },
+            "extensions": {
+              "label": "Extensions",
+              "hint": "Comma-separated, no dots; empty = the shape's defaults."
+            },
+            "maxFiles": {
+              "label": "Max files",
+              "hint": ""
+            },
+            "maxFileBytes": {
+              "label": "Max file size (bytes)",
+              "hint": ""
+            }
+          },
+          "pipedrive": {
+            "apiDomain": {
+              "label": "API domain",
+              "hint": "The api_domain of the account (https://<company>.pipedrive.com); empty = api.pipedrive.com."
+            }
+          },
+          "bitrix24": {
+            "allowPrivate": {
+              "label": "Allow private hosts",
+              "hint": "A self-hosted portal on the LAN — the deployment already opted in."
+            }
+          },
+          "kommo": {
+            "baseUrl": {
+              "label": "Account URL",
+              "hint": "https://<subdomain>.kommo.com or https://<subdomain>.amocrm.ru — not needed with a connected account (it names its host); required with a long-lived token."
+            },
+            "allowPrivate": {
+              "label": "Allow private hosts",
+              "hint": "Loopback / LAN addresses — the deployment already opted in."
+            }
+          },
+          "db": {
+            "database": {
+              "label": "Database",
+              "hint": "The name this agent knows the database by — brain-agent db add <name> <dsn> on that machine (or BRAIN_AGENT_DB_<NAME>). The connection string never reaches the brain."
+            },
+            "databaseKnown": "Databases this agent reported: {names}",
+            "databaseNone": "This agent has reported no databases yet — add one there and let it check in, or type the name it will have.",
+            "entities": {
+              "label": "Tables and views",
+              "hint": "One row per record type: the table or view (schema.table), the key column (default id), the name column (default name), the column that changes when a row does (incremental walks; empty = the whole table every run, rows hashed), the columns to read (empty = all — prefer a view that hides what the brain must not see), and foreign keys as relations."
+            },
+            "entityType": "record type",
+            "entityTable": "table / view",
+            "entityId": "key column",
+            "entityName": "name column",
+            "entityUpdated": "change column",
+            "entityColumns": "columns (comma-separated; empty = all)",
+            "entityRelations": "relations",
+            "relationsHint": "one per line: kind = column → target type, e.g. organization = company_id → organization",
+            "addEntity": "Add a table",
+            "removeEntity": "Remove",
+            "noPreview": "The preview runs on the brain; a database is read by the agent — connect, run Sync, then open the connection to see what came in."
+          },
+          "rest_records": {
+            "baseUrl": {
+              "label": "API base URL",
+              "hint": "Every endpoint path is relative to it."
+            },
+            "authScheme": {
+              "label": "How the credential rides",
+              "hint": "bearer = Authorization: Bearer; header = a header of your naming; query = a query parameter; basic = user:password."
+            },
+            "authHeader": {
+              "label": "Header name",
+              "hint": "e.g. X-Api-Key"
+            },
+            "authParam": {
+              "label": "Query parameter name",
+              "hint": "e.g. api_key — note it travels in every URL."
+            },
+            "allowPrivate": {
+              "label": "Allow private hosts",
+              "hint": "A backend on the LAN — the deployment already opted in."
+            }
+          },
+          "salesforce": {
+            "instanceUrl": {
+              "label": "Org (My Domain) URL",
+              "hint": "https://<org>.my.salesforce.com — empty = the org the connected account or the JWT exchange named."
+            },
+            "loginUrl": {
+              "label": "Login host",
+              "hint": "JWT bearer only: https://login.salesforce.com (default) or https://test.salesforce.com for a sandbox."
+            },
+            "apiVersion": {
+              "label": "API version",
+              "hint": "REST API version, e.g. v62.0 (default)."
+            },
+            "bulk": {
+              "label": "Bulk API 2.0 for the first walk",
+              "hint": "For a large org: the full walk runs as one query job per object (CSV pages); incremental runs stay on the query endpoint."
+            }
+          }
+        },
+        "authOptions": {
+          "none": "none",
+          "bearer": "bearer token",
+          "basic": "basic (user:password)",
+          "header": "custom header",
+          "query": "query parameter"
+        },
+        "schedule": {
+          "title": "Schedule",
+          "manual": {
+            "title": "Manual",
+            "body": "Only when you press Sync."
+          },
+          "15m": {
+            "title": "Every 15 minutes",
+            "body": "For sources that change all day."
+          },
+          "1h": {
+            "title": "Hourly",
+            "body": ""
+          },
+          "4h": {
+            "title": "Every 4 hours",
+            "body": ""
+          },
+          "24h": {
+            "title": "Daily",
+            "body": "Docs, sites, archives."
+          }
+        },
+        "content": {
+          "title": "What to take",
+          "text": {
+            "title": "Content",
+            "body": "Fetch every changed item and commit it through the doors — facts, documents, evidence."
+          },
+          "bytes": {
+            "title": "Content",
+            "body": "Fetch the bytes into the evidence plane; processors extract the text."
+          },
+          "manifest": {
+            "title": "Catalogue only",
+            "body": "Record what exists and when it changed; fetch nothing."
+          }
+        },
+        "onDelete": {
+          "title": "When an item disappears",
+          "close": {
+            "title": "Close",
+            "body": "Its facts stay as history with an end date (recommended)."
+          },
+          "keep": {
+            "title": "Keep",
+            "body": "Nothing changes; the facts stay current."
+          },
+          "retract": {
+            "title": "Retract",
+            "body": "Like close today; a full retraction cascade comes later."
+          }
+        },
+        "fetchBudget": "Fetch budget",
+        "fetchBudgetHint": "Max items fetched per sync; empty = no cap.",
+        "ownerUserId": "Owner user id",
+        "ownerUserIdHint": "Set = a personal connection: every row it writes is fenced to that user.",
+        "vertical": "Vertical",
+        "verticalHint": "contextRef.vertical on every fact this connection writes; defaults to the pack.",
+        "shape": {
+          "document": "documents",
+          "binary": "files",
+          "structure": "records",
+          "conversation": "messages"
+        }
+      },
+      "kinds": {
+        "folder": {
+          "title": "Folder",
+          "body": "A directory of documents — markdown, text, code, PDFs, Word / Excel / PowerPoint, mail. On the brain's host, or on a laptop through the local agent.",
+          "shapes": {
+            "document": "Text documents",
+            "documentHint": "markdown, text, csv, json, yaml, html, code",
+            "binary": "Files",
+            "binaryHint": "PDFs, Word / Excel / PowerPoint, .eml mail, images"
+          }
+        },
+        "site": {
+          "title": "Website",
+          "body": "Pages and sitemaps of a docs portal, a wiki, a company site — read as text; PDFs and office documents handed to the evidence plane.",
+          "shapes": {
+            "document": "Pages",
+            "documentHint": "HTML reduced to text, plain text, JSON",
+            "binary": "Files",
+            "binaryHint": "PDFs and office documents the sitemap lists"
+          }
+        },
+        "notion": {
+          "title": "Notion",
+          "body": "The pages a connected Notion integration can see — every page and database row, or the subtrees under the pages you name — rendered as text with a row’s properties above it; edited pages are re-read.",
+          "shapes": {
+            "document": "Pages",
+            "documentHint": "pages and database rows as text",
+            "binary": "",
+            "binaryHint": ""
+          }
+        },
+        "gmail": {
+          "title": "Gmail",
+          "body": "The messages of a connected Gmail account, narrowed by your own Gmail query — each one a turn of its thread, the sender as the speaker, quoted replies stripped; attachments handed to the evidence plane.",
+          "shapes": {
+            "document": "Messages",
+            "documentHint": "each message one turn of its thread",
+            "binary": "Attachments",
+            "binaryHint": "PDFs and office documents on the same messages"
+          }
+        },
+        "imap": {
+          "title": "Mailbox (IMAP)",
+          "body": "Any mailbox over IMAP — host, user and an app password — read-only: the mailboxes you name, mail since a date, then only what is new; each message a turn of its thread.",
+          "shapes": {
+            "document": "Messages",
+            "documentHint": "each message one turn of its thread",
+            "binary": "",
+            "binaryHint": ""
+          }
+        },
+        "github": {
+          "title": "GitHub repository",
+          "body": "One repository over the API, no clone — every issue and pull request as a conversation (body and comments), and the text documents of its tree.",
+          "shapes": {
+            "document": "Docs",
+            "documentHint": "README, docs/**, ADRs, changelogs",
+            "binary": "",
+            "binaryHint": ""
+          }
+        },
+        "slack": {
+          "title": "Slack",
+          "body": "The channels a Slack app is a member of — every message one turn of its channel or thread, the author as the speaker, mentions and links resolved, files named.",
+          "shapes": {
+            "document": "Messages",
+            "documentHint": "each message one turn of its channel or thread",
+            "binary": "",
+            "binaryHint": ""
+          }
+        },
+        "telegram": {
+          "title": "Telegram (bot)",
+          "body": "The groups and channels your bot is in, read as they arrive — a feed: what the bot did not catch is gone from Telegram, and nothing here is ever marked missing.",
+          "shapes": {
+            "document": "Messages",
+            "documentHint": "each message one turn of its chat or topic",
+            "binary": "",
+            "binaryHint": ""
+          }
+        },
+        "confluence": {
+          "title": "Confluence Cloud",
+          "body": "The pages (and blog posts) of a Confluence Cloud site the connected Atlassian account reaches, by space, reduced to text; the version is the revision.",
+          "shapes": {
+            "document": "Pages",
+            "documentHint": "pages and blog posts as text",
+            "binary": "",
+            "binaryHint": ""
+          }
+        },
+        "bucket": {
+          "title": "S3 bucket",
+          "body": "Objects under a prefix of an S3 or S3-compatible bucket (AWS, MinIO, R2, B2).",
+          "shapes": {
+            "document": "Text documents",
+            "documentHint": "markdown, text, csv, json, yaml, html",
+            "binary": "Files",
+            "binaryHint": "PDFs, office documents, mail, images"
+          }
+        },
+        "mcp": {
+          "title": "MCP server",
+          "body": "The resources an MCP server exposes — a wiki, a knowledge base, a CMS behind an MCP endpoint.",
+          "shapes": {
+            "document": "Text resources",
+            "documentHint": "text and JSON resources",
+            "binary": "Blob resources",
+            "binaryHint": "PDFs, office documents, images"
+          }
+        },
+        "repo": {
+          "title": "Git repository",
+          "body": "The committed docs of a repository — README, docs/**, ADRs, changelogs — read on the machine that has the clone, with the commit as the revision.",
+          "shapes": {
+            "document": "Documents",
+            "documentHint": "",
+            "binary": "Files",
+            "binaryHint": ""
+          }
+        },
+        "gdrive": {
+          "title": "Google Drive",
+          "body": "My Drive, a folder or a shared drive of a Google account you connect — read as documents, incrementally through the Drive changes feed.",
+          "shapes": {
+            "document": "Text documents",
+            "documentHint": "markdown, text, csv, json, html; Docs / Sheets / Slides as text",
+            "binary": "Files",
+            "binaryHint": "PDFs, Word / Excel / PowerPoint, images"
+          }
+        },
+        "onedrive": {
+          "title": "OneDrive / SharePoint",
+          "body": "A OneDrive folder or a SharePoint document library of a Microsoft account you connect — incrementally through the Graph delta.",
+          "shapes": {
+            "document": "Text documents",
+            "documentHint": "markdown, text, csv, json, html",
+            "binary": "Files",
+            "binaryHint": "PDFs, Word / Excel / PowerPoint, mail, images"
+          }
+        },
+        "dropbox": {
+          "title": "Dropbox",
+          "body": "A Dropbox folder of an account you connect — incrementally through the folder cursor.",
+          "shapes": {
+            "document": "Text documents",
+            "documentHint": "markdown, text, csv, json, html",
+            "binary": "Files",
+            "binaryHint": "PDFs, Word / Excel / PowerPoint, mail, images"
+          }
+        },
+        "records": {
+          "title": "CRM · {connector}",
+          "body": "People, organizations and deals of a CRM as facts with the revision they were read at — stage, amount, owner, title, company. Records enter deterministically: no model reads them.",
+          "shapes": {
+            "document": "Records",
+            "documentHint": "deals, persons, organizations",
+            "binary": "",
+            "binaryHint": ""
+          }
+        },
+        "db": {
+          "title": "Database (agent)",
+          "body": "A self-hosted CRM, ERP or ticketing backend read straight from its database by the local agent — each table or view one record type, each row one record, foreign keys as relations. The agent holds the connection string; the brain only knows the name.",
+          "shapes": {
+            "document": "Records",
+            "documentHint": "rows of the tables and views you name",
+            "binary": "",
+            "binaryHint": ""
+          }
+        },
+        "external": {
+          "title": "Pushed by a publisher",
+          "body": "An indexer or tool pushes here through the doors; connecting only creates the identity its writes are attributed to.",
+          "shapes": {
+            "document": "Documents",
+            "documentHint": "",
+            "binary": "Files",
+            "binaryHint": ""
+          }
+        },
+        "other": {
+          "title": "{connector}",
+          "body": "",
+          "shapes": {
+            "document": "Documents",
+            "documentHint": "",
+            "binary": "Files",
+            "binaryHint": ""
+          }
+        },
+        "both": "Both",
+        "bothHint": "two connections over the same place — one for documents, one for files",
+        "whatsInside": "What's in it?",
+        "viaPack": "via {packId}",
+        "status": {
+          "ready": "Ready",
+          "agent": "Through the local agent",
+          "external": "Publisher pushes",
+          "disabled": "Switched off",
+          "missing": "Not in this build",
+          "notAccepted": "Sources not accepted"
+        },
+        "statusHint": {
+          "ready": "",
+          "agent": "Runs on a brain-agent on the machine that has it; you get the command after connecting.",
+          "external": "",
+          "disabled": "Set {flag}=1 on the brain and restart.",
+          "missing": "This build ships no such connector.",
+          "notAccepted": "Reinstall the pack with acceptSources.",
+          "oauthUnconfigured": "Register a {provider} app on the brain first ({flag}); the connect button then signs in."
+        },
+        "connect": "Connect",
+        "deployment": "Deployment fences"
+      },
+      "picker": {
+        "browse": "Browse…",
+        "title": "Pick the folder",
+        "serverHint": "The brain's own disk, inside SOURCE_FS_ROOTS. Open a folder to look inside; \"use this\" makes it the connection's folder; tick subfolders to read only those.",
+        "agentHint": "What agent {agentId} reported on its last check-in — the folders under its roots, names only. \"Use this\" makes one the connection's folder; tick subfolders to read only those.",
+        "agentMissing": "Agent {agentId} has not checked in yet. Install it on that machine (Local agents → Set up an agent) and wait one pass, or type the path.",
+        "reportedAt": "reported {at} by {hostname}",
+        "up": "↑ up",
+        "jailRoots": "allowed roots",
+        "useThis": "use this",
+        "isRoot": "✓ this folder",
+        "noFolders": "no subfolders here ({files} files)",
+        "truncated": "Only the first 500 subfolders are shown.",
+        "tickHint": "read only this subfolder (adds it to \"only these paths\")",
+        "tickedCount": "{n} subfolder(s) ticked",
+        "nothingYet": "nothing chosen yet",
+        "use": "Use"
+      },
+      "accounts": {
+        "title": "Connected accounts",
+        "subtitle": "Accounts the brain reads cloud sources as — connected once, tokens encrypted on the brain, refreshed before every sync.",
+        "headers": {
+          "provider": "provider",
+          "account": "account",
+          "status": "status",
+          "usedBy": "used by",
+          "expires": "token",
+          "actions": "actions"
+        },
+        "none": "No accounts connected. You connect one while adding a Google Drive, OneDrive or Dropbox source.",
+        "mcpProvider": "MCP server",
+        "status": {
+          "active": "active",
+          "revoked": "disconnected",
+          "broken": "needs reconnecting"
+        },
+        "refreshable": "refreshes itself",
+        "notRefreshable": "no refresh token — until {at}",
+        "noExpiry": "no refresh token — valid until disconnected",
+        "expiresAt": "until {at}",
+        "usedBy": "{n} connections",
+        "usedByOne": "1 connection",
+        "unused": "unused",
+        "disconnect": "Disconnect",
+        "disconnectPrompt": "Disconnect {account}? Connections that run as it will fail their next sync until reconnected.",
+        "disconnected": "Disconnected{provider}.",
+        "providerRevoked": " (revoked at the provider too)",
+        "providerNotRevoked": " — the provider did not confirm; revoke it in the account's settings as well",
+        "providers": "Providers",
+        "configured": "app registered",
+        "notConfigured": "not configured — set {flag}",
+        "redirect": "redirect URI",
+        "notReady": "Connected accounts are off (SOURCE_OAUTH_CLIENT) or the brain has no SOURCE_CREDENTIAL_ENCRYPTION_KEY.",
+        "org": "org {url}"
+      },
+      "records": {
+        "entities": "What to sync",
+        "entitiesHint": "The record types this connection reads; each becomes catalogue rows and facts.",
+        "mapping": "Fields → facts",
+        "mappingHint": "Which attribute becomes which fact. Unmapped fields stay in the record's text (searchable) but make no fact.",
+        "field": "field",
+        "predicate": "fact",
+        "none": "— not a fact —",
+        "preview": "Preview",
+        "previewing": "Asking the CRM…",
+        "previewHint": "Lists the first records at the CRM with this setup and shows the facts they would become. Nothing is written.",
+        "previewEmpty": "No records.",
+        "unmapped": "unmapped: {fields}",
+        "dropped": "dropped: {items}",
+        "relations": "relations",
+        "pushHint": "Any automation posts records here with a brain:write key:",
+        "pushGone": "gone: [\"deal/4812\"] closes a record's facts.",
+        "describe": "Describe the API",
+        "describeHint": "Give the brain the API’s OpenAPI document (a URL it fetches, or pasted JSON / YAML) and / or one sample answer of a list endpoint. It proposes which endpoints are records, how they page, which field is the id / name / updated-at, and which fields become facts. Then Preview runs it against the live API — nothing is trusted until you saw the rows.",
+        "openapiUrl": "OpenAPI document URL",
+        "openapiUrlHint": "Fetched by the brain (LAN hosts need “Allow private hosts”).",
+        "openapiText": "or paste the document",
+        "openapiTextHint": "OpenAPI 3.x as JSON or YAML, up to 2 MB.",
+        "sample": "Sample answer of a list endpoint",
+        "sampleHint": "What a curl of the list returned — the rows tell what the document cannot (a next link, the real fields). Optional next to a document; alone it proposes one entity.",
+        "samplePath": "its path, e.g. /deals",
+        "sampleType": "entity type, e.g. deal",
+        "sampleInvalid": "The sample is not valid JSON.",
+        "propose": "Propose",
+        "proposing": "Proposing…",
+        "refined": "refined by the model",
+        "heuristicOnly": "by conventional names — the model is off (SOURCE_MAPPING_ASSISTANT)",
+        "confidence": "confidence {pct}%",
+        "sourceOf": {
+          "openapi": "from the document",
+          "sample": "from the sample",
+          "model": "from the model",
+          "operator": "yours"
+        },
+        "rowsAt": "rows at",
+        "pagingOf": "paging",
+        "sinceOf": "since",
+        "noSince": "no updated-since parameter (every run re-reads everything)",
+        "nameOf": "name",
+        "updatedOf": "updated",
+        "editEndpoint": "edit the endpoint as JSON",
+        "endpointInvalid": "Not valid JSON."
+      },
+      "webhook": {
+        "title": "Inbound webhook",
+        "hint": "The vendor calls the brain on change and the changed record is fetched at once — freshness in seconds instead of the schedule. Nothing in the call enters memory: it only names the record.",
+        "on": "on",
+        "off": "off",
+        "lastEvent": "last call {at}",
+        "noEvent": "no call received yet",
+        "enable": "Switch on",
+        "rotate": "Rotate the secret",
+        "disable": "Switch off",
+        "disablePrompt": "Switch the webhook off? The vendor's calls will answer 404 until it is switched on again (a new address and secret).",
+        "secretLabel": "Vendor secret (optional)",
+        "secretHint": "Leave empty to generate one. Paste the vendor's own token where the vendor issues it: the Bitrix24 outbound webhook's application token, a HubSpot private app's client secret (empty = the deployment's HubSpot app).",
+        "working": "switching on…",
+        "url": "Address to register at the vendor",
+        "secret": "Secret",
+        "secretOnce": "Shown once — the brain keeps it encrypted. Copy it now.",
+        "copy": "Copy",
+        "copied": "Copied",
+        "notes": "How to register it",
+        "scheme": {
+          "hubspot": "HubSpot v3 signature",
+          "pipedrive": "HTTP Basic (password = secret)",
+          "bitrix24": "application token in the form",
+          "kommo": "token in the URL",
+          "signed": "HMAC of the body, bearer, or token in the URL"
+        },
+        "flagOff": "The webhook lane is off on this brain — set SOURCE_WEBHOOKS=1 (and SOURCE_CREDENTIAL_ENCRYPTION_KEY).",
+        "unsupported": "This connector has no webhook lane."
       }
     },
     "marketplace": {
@@ -946,7 +2333,11 @@
     "subtitle": "Connect Claude Code, ChatGPT, Cursor and your own code to the same graph. What one of them writes, the next one recalls — because the workspace comes from the key, not from the app that happens to be open.",
     "hubLabel": "Your memory",
     "hubTitle": "One graph",
-    "hubItems": ["Facts & beliefs", "Episodes & scenes", "Sources & evidence"],
+    "hubItems": [
+      "Facts & beliefs",
+      "Episodes & scenes",
+      "Sources & evidence"
+    ],
     "sdkLabel": "Your app",
     "clientsLabel": "Clients you connect",
     "surfaceLabel": "One surface",

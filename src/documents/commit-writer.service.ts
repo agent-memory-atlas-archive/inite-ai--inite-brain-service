@@ -10,6 +10,7 @@ import { originKeyOf, StoredDocument } from './document-store.service';
 import { internalMetaString, participantsFromMeta } from './document-meta';
 import { coreferentParticipant, participantHint } from '../ingest/participants';
 import { sanitizeSourceMeta } from '../policy/source-meta';
+import { sourceVersionFromHeader } from './document-meta';
 import { incomingFactsFor, MergedFact, MergedRelation, MergeResult } from './candidate-merge';
 
 export interface FactWriteOutcome {
@@ -82,12 +83,18 @@ export class CommitWriterService {
           this.entities.resolveOrCreateNamedEntity({
             db,
             e: { name: me.name, type: me.type, canonical: me.canonical, known: me.known },
-            // The participant this mention corefers to (first person /
-            // the speaker's own name → the speaker; second person / the
-            // addressee's name → the addressee) anchors it to the
-            // caller's externalRef — the same rule as the direct path
-            // (participants.ts); the user's own ref carries their scope.
-            hint: participantHint(coreferentParticipant(me.name, participants), p.doc.userId),
+            // Two anchors, most specific first. A system-of-record id names
+            // WHICH entity this is (a CRM contact by its id, whatever it is
+            // called today) and cannot be guessed from prose, so it wins when
+            // the records door supplied one. Otherwise the participant this
+            // mention corefers to (first person / the speaker's own name →
+            // the speaker; second person / the addressee's name → the
+            // addressee) anchors it to the caller's externalRef — the same
+            // rule as the direct path (participants.ts), and the user's own
+            // ref carries their scope.
+            hint: me.externalId
+              ? { vertical: p.doc.vertical, id: me.externalId }
+              : participantHint(coreferentParticipant(me.name, participants), p.doc.userId),
             _contextRef: { vertical: p.doc.vertical },
             incomingFacts: incomingFactsFor(p.merge, me.key),
           }),
@@ -237,7 +244,7 @@ export class CommitWriterService {
       originKey: originKeyOf(doc.contentHash),
       ...(episodeId ? { episodeIds: [episodeId] } : {}),
       ...(meta ? { meta } : {}),
-      ...sourceVersionOf(mf),
+      ...sourceVersionOf(mf, doc),
       indexers: mf.contributors.map((c) => ({
         packId: c.indexerId,
         packVersion: c.packVersion,
@@ -319,10 +326,15 @@ export class CommitWriterService {
  * none. Returns `{}` — not a null key — when nothing carries a stamp, so
  * the flag-off `source` object is byte-identical.
  */
-export function sourceVersionOf(mf: MergedFact): Record<string, unknown> {
+export function sourceVersionOf(mf: MergedFact, doc?: StoredDocument): Record<string, unknown> {
   const leader = mf.contributors.find((c) => c.candidateId === mf.leaderId);
   const stamp =
     leader?.sourceVersion ??
-    mf.contributors.find((c) => c.sourceVersion !== undefined)?.sourceVersion;
+    mf.contributors.find((c) => c.sourceVersion !== undefined)?.sourceVersion ??
+    // Source plane: an in-process extraction has no candidate stamp, but
+    // the document header carries the revision the connector read the
+    // item at — every fact derived from it is bound to that revision.
+    sourceVersionFromHeader(doc?.meta as Record<string, unknown> | undefined) ??
+    undefined;
   return stamp ? { sourceVersion: stamp } : {};
 }

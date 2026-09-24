@@ -91,6 +91,37 @@ const PLATFORM_OPERATIONS: Array<[string, string]> = [
   ['/v1/admin/indexers/{packId}/runs', 'get'],
   ['/v1/sources', 'get'],
   ['/v1/sources/{sourceKey}', 'get'],
+  // source plane (raw-evidence-sources-2026-09.md, W0) — the operator surface
+  ['/v1/admin/source-connections', 'get'],
+  ['/v1/admin/source-connections', 'post'],
+  ['/v1/admin/source-connections/catalog', 'get'],
+  ['/v1/admin/source-connections/{id}', 'get'],
+  ['/v1/admin/source-connections/{id}', 'patch'],
+  ['/v1/admin/source-connections/{id}', 'delete'],
+  ['/v1/admin/source-connections/{id}/items', 'get'],
+  ['/v1/admin/source-connections/{id}/sync', 'post'],
+  ['/v1/admin/source-connections/{id}/stats', 'get'],
+  ['/v1/admin/source-connections/{id}/runs', 'get'],
+  ['/v1/admin/source-connections/{id}/items/{itemId}', 'get'],
+  ['/v1/admin/source-connections/agents', 'get'],
+  ['/v1/admin/source-connections/browse', 'get'],
+  ['/v1/admin/source-connections/oauth/start', 'post'],
+  ['/v1/admin/source-connections/oauth/mcp/start', 'post'],
+  ['/v1/admin/source-connections/oauth/grants', 'get'],
+  ['/v1/admin/source-connections/oauth/grants/{id}', 'delete'],
+  ['/v1/source-connections/oauth/callback', 'get'],
+  ['/v1/source-connections/{id}/records', 'post'],
+  ['/v1/admin/source-connections/preview', 'post'],
+  ['/v1/admin/source-connections/assist', 'post'],
+  ['/v1/admin/source-connections/{id}/webhook', 'post'],
+  ['/v1/admin/source-connections/{id}/webhook', 'delete'],
+  ['/v1/source-connections/webhook/{address}', 'post'],
+  ['/v1/source-connections/agents/{agentId}', 'put'],
+  ['/v1/source-connections', 'get'],
+  ['/v1/source-connections/{id}/agent-runs', 'post'],
+  ['/v1/source-connections/{id}/agent-runs/{runId}/deltas', 'post'],
+  ['/v1/source-connections/{id}/agent-runs/{runId}/items', 'post'],
+  ['/v1/source-connections/{id}/agent-runs/{runId}/finish', 'post'],
   // raw-substrate driver v1 (episodes read + subscriptions + projections)
   ['/v1/episodes', 'get'],
   ['/v1/episodes/export', 'get'],
@@ -170,10 +201,16 @@ describe('docs/openapi.json', () => {
 
   it('every operation states its required scope and is bearer-secured', () => {
     expect(built.security).toEqual([{ bearerAuth: [] }]);
-    // The ONE deliberately unauthenticated operation: signed-URL redeem
-    // (the token IS the capability — see evidence-read.controller.ts).
-    // Everything else must state its bearer scope.
-    const unauthenticated = new Set(['get /v1/evidence/redeem/{token}']);
+    // The TWO deliberately unauthenticated operations: signed-URL redeem
+    // (the token IS the capability — see evidence-read.controller.ts) and
+    // the OAuth return leg (the HMAC-signed state is — the browser arrives
+    // from the provider with no brain credential; source-oauth-callback.
+    // controller.ts). Everything else must state its bearer scope.
+    const unauthenticated = new Set([
+      'get /v1/evidence/redeem/{token}',
+      'get /v1/source-connections/oauth/callback',
+      'post /v1/source-connections/webhook/{address}',
+    ]);
     for (const [path, method] of PLATFORM_OPERATIONS) {
       if (unauthenticated.has(`${method} ${path}`)) continue;
       const op = ((built.paths as Json)[path] as Json)[method] as Json;

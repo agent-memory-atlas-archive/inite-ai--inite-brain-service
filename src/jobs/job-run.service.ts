@@ -21,7 +21,8 @@ export type JobType =
   | 'pack_seed_ingest'
   | 'scenarios_batch'
   | 'registry_mirror'
-  | 'evidence_document_bridge';
+  | 'evidence_document_bridge'
+  | 'source_sync';
 
 export type JobStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled';
 
@@ -180,7 +181,8 @@ export class JobRunService {
   // which isCancelRequested() also consults, so an evicted hint never loses
   // a cancel in persist mode.
   private readonly inProcessCancelHints = new LRUCache<string, true>(10_000);
-  private readonly persistEnabled: boolean;
+  /** Whether rows are written at all (JOB_RUN_PERSIST) — readers of history ask before querying. */
+  readonly persistEnabled: boolean;
 
   constructor(
     @Optional() private readonly surreal?: SurrealService,
@@ -220,23 +222,24 @@ export class JobRunService {
     if (this.persistEnabled && this.surreal) {
       try {
         await this.surreal.withCompany(input.companyId, async (db) => {
-          await db.query(
-            `CREATE job_run CONTENT {
-               runId: $runId, jobType: $jobType, status: $status,
-               triggeredBy: $triggeredBy, triggeredByActor: $triggeredByActor,
-               startedAt: $startedAt, progress: $progress,
-               cancelRequested: false
-             }`,
-            {
+          // SurrealDB 3.x coerces nothing: `startedAt` is a datetime (a
+          // Date on the wire, never the ISO string the row carries) and
+          // `progress` / `triggeredByActor` are option<> fields that take
+          // NONE, never a JS null — so an empty one is an absent key.
+          // Before this the CREATE failed on every call and inline runs
+          // never reached the row.
+          await db.query(`CREATE job_run CONTENT $content`, {
+            content: {
               runId,
               jobType: row.jobType,
               status: row.status,
               triggeredBy: row.triggeredBy,
-              triggeredByActor: row.triggeredByActor,
-              startedAt: row.startedAt,
-              progress: row.progress,
+              startedAt: new Date(row.startedAt),
+              cancelRequested: false,
+              ...(row.triggeredByActor ? { triggeredByActor: row.triggeredByActor } : {}),
+              ...(row.progress ? { progress: row.progress } : {}),
             },
-          );
+          });
         });
       } catch (e) {
         this.logger.warn(
@@ -286,14 +289,17 @@ export class JobRunService {
             // by a queue worker (claimedBy set) or already finished, this
             // write must be a no-op instead of clobbering the other owner's
             // terminal state.
+            // Same 3.x discipline as start(): a Date for the datetime, NONE
+            // (not a JS null) for the option<> fields left empty.
             `UPDATE job_run SET status = $status, finishedAt = $finishedAt,
-                                result = $result, error = $error
+                                result = ${row.result ? '$result' : 'NONE'},
+                                error = ${row.error ? '$error' : 'NONE'}
               WHERE runId = $runId AND status = 'running' AND claimedBy IS NONE`,
             {
               status: row.status,
-              finishedAt: row.finishedAt,
-              result: row.result ?? null,
-              error: row.error ?? null,
+              finishedAt: new Date(row.finishedAt ?? Date.now()),
+              result: row.result ?? undefined,
+              error: row.error ?? undefined,
               runId: row.runId,
             },
           );

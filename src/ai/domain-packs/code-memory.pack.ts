@@ -47,11 +47,15 @@ import { composePredicateId, type DomainPackManifest } from './manifest';
  * `source_version_match` verificationRule names the first group; the
  * second is simply not listed, and is therefore never swept.
  *
+ * 0.8.0 declares the pack's SOURCE: a `sources` entry of kind `external`
+ * naming the repository — the first source pack, retrofitted; nothing
+ * about the runner or the protocol changes.
+ *
  * Bump `version` to ship an updated code-memory ontology.
  */
 export const CODE_MEMORY_PACK: DomainPackManifest = {
   id: 'code_memory',
-  version: '0.7.0',
+  version: '0.10.0',
   description:
     'Non-derivable engineering "why" of a codebase — decisions, rationale, invariants, gotchas, ownership, flag/config defaults, dependency pins, and decision supersession anchored to code, with a domain extraction profile and memory model.',
   // Retro-declaration, documentation-true: code-memory has ALWAYS been an
@@ -59,6 +63,60 @@ export const CODE_MEMORY_PACK: DomainPackManifest = {
   // (raw source never leaves the machine) and posts typed facts. No
   // in-process extraction run exists for it.
   indexer: { mode: 'external' },
+  // The first source pack, retrofitted (raw-evidence-sources-2026-09.md
+  // § 5.1): the repository IS this pack's source, and its connector —
+  // the repo indexer — runs where the code lives and pushes candidates
+  // through the external-indexer protocol. `external` says exactly
+  // that; nothing about the runner changes. Git is agent-host by
+  // doctrine ("NO GIT LIVES HERE"): a server-side connection of this
+  // source is a catalogue the agent fills, never a checkout.
+  sources: [
+    {
+      id: 'repository',
+      kind: 'external',
+      shape: 'structure',
+      title: 'Git repository',
+      description:
+        'A code repository read by the repo indexer (pnpm indexer:repo / the local agent): ownership, decisions, warnings and version pins as candidates, stamped with the commit they were read at.',
+    },
+    // The same repository, its DOCS as documents: READMEs, docs/**, ADRs,
+    // changelogs — read from the committed tree by the local agent's git
+    // connector (git never runs in the brain process), each stamped with
+    // its blob sha. One repo, two shapes.
+    {
+      id: 'repo_docs',
+      kind: 'native',
+      connector: 'git',
+      shape: 'document',
+      title: 'Repository docs (agent)',
+      description:
+        'The committed text documents of a repository — README, docs/**, ADRs, changelogs — read by the local agent (host agent:<id>) with the blob sha as revision and the last commit touching each file as its time. config: { repo, ref?, extensions?, include?, maxFiles?, maxFileBytes? }.',
+      defaults: { contentPolicy: 'text', deletePolicy: 'close', schedule: 'manual' },
+    },
+    // ── The forge (W4.8): the same repository over the API, without a
+    // clone — what was DISCUSSED about the code (issues and pull
+    // requests as conversations) and the docs of its tree.
+    {
+      id: 'github_issues',
+      kind: 'native',
+      connector: 'github',
+      shape: 'conversation',
+      title: 'GitHub issues and pull requests',
+      description:
+        'Every issue and pull request of a GitHub repository as one conversation — the body and then every comment, each speaking as its author; `updated_at` is the revision, so a new comment brings the thread back whole. config: { repo, baseUrl?, includePullRequests?, labels?, since?, maxItems? }; credential: a connected GitHub account or a token with read access.',
+      defaults: { contentPolicy: 'text', deletePolicy: 'close', schedule: '1h' },
+    },
+    {
+      id: 'github_docs',
+      kind: 'native',
+      connector: 'github',
+      shape: 'document',
+      title: 'GitHub repository docs',
+      description:
+        'The text documents of a GitHub repository read over the API (no clone) — README, docs/**, ADRs, changelogs — from one recursive tree call, the blob sha as the revision. config: { repo, baseUrl?, ref?, paths?, extensions?, maxFiles?, maxFileBytes? }; same credential as `github_issues`.',
+      defaults: { contentPolicy: 'text', deletePolicy: 'close', schedule: '4h' },
+    },
+  ],
   predicates: [
     {
       localId: 'decided',

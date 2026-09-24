@@ -21,6 +21,8 @@ export interface MergedEntity {
   name: string;
   type: string;
   canonical?: string | undefined;
+  /** The system-of-record's id, when an external submission named one — the commit files the entity under it. */
+  externalId?: string | undefined;
   /** knowledge_entity the extractor pinned the mention to (memory context). */
   known?: string | undefined;
   /** Leader first; the rest fold to status 'merged'. */
@@ -106,15 +108,28 @@ export function mergeCandidates(rows: CandidateRow[]): MergeResult {
  * that share an alias (within a type). Two indexers agree if they overlap on
  * either surface.
  */
-function mergeEntities(rows: CandidateRow[], ctx: MergeContext): MergedEntity[] {
-  const dsu = new AliasUnionFind();
-  const items: Array<{
-    row: CandidateRow;
-    name: string;
-    canonical?: string | undefined;
-    nameKey: string;
-  }> = [];
-  // Pass 1: register aliases and union each candidate's own aliases.
+interface EntityItem {
+  row: CandidateRow;
+  name: string;
+  canonical?: string | undefined;
+  externalId?: string | undefined;
+  nameKey: string;
+}
+
+/**
+ * Pass 1: register aliases and union each candidate's own. An externalId is
+ * an identity of its own — two candidates naming the same id fold together
+ * even when their names differ (a renamed contact), and the id key is what
+ * the commit files the entity under. Split from the grouping pass below
+ * because between them they carry two identity rules (alias folding and the
+ * memory-context pin) and one function holding both reads as neither.
+ */
+function collectEntityItems(
+  rows: CandidateRow[],
+  ctx: MergeContext,
+  dsu: AliasUnionFind,
+): EntityItem[] {
+  const items: EntityItem[] = [];
   for (const row of rows) {
     if (row.kind !== 'entity') continue;
     const p = row.payload;
@@ -126,10 +141,19 @@ function mergeEntities(rows: CandidateRow[], ctx: MergeContext): MergedEntity[] 
     const nameKey = joinKey(type, foldName(p.name));
     const canonical =
       typeof p.canonical === 'string' && p.canonical.trim() ? p.canonical : undefined;
+    const externalId =
+      typeof p.externalId === 'string' && p.externalId.trim() ? p.externalId.trim() : undefined;
     dsu.add(nameKey);
     if (canonical) dsu.union(nameKey, joinKey(type, foldName(canonical)));
-    items.push({ row, name: p.name, canonical, nameKey });
+    if (externalId) dsu.union(nameKey, joinKey(type, `#${externalId}`));
+    items.push({ row, name: p.name, canonical, externalId, nameKey });
   }
+  return items;
+}
+
+function mergeEntities(rows: CandidateRow[], ctx: MergeContext): MergedEntity[] {
+  const dsu = new AliasUnionFind();
+  const items = collectEntityItems(rows, ctx, dsu);
   // Pass 2: group by DSU root (stable) — roots are final after all unions.
   const entities = new Map<string, MergedEntity>();
   for (const it of items) {
@@ -140,6 +164,7 @@ function mergeEntities(rows: CandidateRow[], ctx: MergeContext): MergedEntity[] 
     if (existing) {
       existing.candidateIds.push(it.row.id);
       if (!existing.canonical && it.canonical) existing.canonical = it.canonical;
+      if (!existing.externalId && it.externalId) existing.externalId = it.externalId;
       if (!existing.known && known) existing.known = known;
     } else {
       entities.set(key, {
@@ -147,6 +172,7 @@ function mergeEntities(rows: CandidateRow[], ctx: MergeContext): MergedEntity[] 
         name: it.name,
         type: normalizeType(it.row.payload.type),
         canonical: it.canonical,
+        externalId: it.externalId,
         ...(known ? { known } : {}),
         candidateIds: [it.row.id],
       });

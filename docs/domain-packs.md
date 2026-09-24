@@ -669,6 +669,59 @@ facts-survive philosophy as predicate deprecation. The provenance meta keys
 above make them queryable (`source.meta.pack_id`) for manual cleanup or an
 ABAC deny rule.
 
+## Sources (consumed)
+
+A pack MAY declare WHERE its documents come from — the `sources` section
+([source-plane.md](source-plane.md), roadmap
+[raw-evidence-sources-2026-09](roadmap/raw-evidence-sources-2026-09.md)).
+A source is a pack: the entry names an external system the pack knows how
+to read and the SHAPE its items take, and the shape decides which ingest
+door an item enters (`document` → `ingest/document`, `conversation` →
+`ingest/mention`, `binary` → evidence-blob, `structure` → the record
+envelope). Declarative data inside the signed manifest, like every other
+section:
+
+```jsonc
+"sources": [
+  { "id": "wiki",   "kind": "mcp",      "transport": "http", "url": "https://mcp.publisher.example/wiki",
+    "auth": "install_secret", "shape": "document",
+    "defaults": { "contentPolicy": "text", "deletePolicy": "close", "schedule": "1h" } },
+  { "id": "vault",  "kind": "mcp",      "transport": "stdio", "command": "npx obsidian-mcp", "shape": "document" },
+  { "id": "folder", "kind": "native",   "connector": "fs", "shape": "binary" },
+  { "id": "ci",     "kind": "external", "shape": "structure" }
+]
+```
+
+- **`mcp`** — an MCP server exposing resources; brain harvests it (`http`:
+  the server host, egress-guarded at install and per sync; `stdio`: the
+  local agent spawns it). `auth` is `install_secret` (the per-install
+  webhook secret as bearer — a publisher-operated server), `oauth` (W4)
+  or `none`. An `http` entry pins `url` when the publisher operates the
+  server; leaving it out makes the entry **operator-named** — the
+  connection carries `config.url` (guarded at create) and the consent
+  reads "an MCP server the operator names" (`web_memory`'s
+  `mcp_resources`). A `stdio` entry runs on the local agent
+  (`@inite/brain-agent`), which spawns the named command.
+- **`native`** — a platform-shipped connector, NAMED by the pack and never
+  supplied by it (the anti-DSL doctrine: exactly like `processors`, a
+  kind with no installed connector fails every sync, never runs foreign
+  code). None ship in W0; `fs` / `s3` / `url` arrive in W1.
+- **`external`** — the publisher pushes items itself through the existing
+  doors; the connection is a catalogue it fills. `indexer.mode: 'external'`
+  seen from the source side — the builtin `code_memory` declares its
+  repository this way.
+
+Caps: ≤ 16 sources, ids snake_case and unique, `title` ≤ 80, `description`
+≤ 500 (`pnpm pack:validate`, again at install). **Consent**: a manifest
+with sources needs `acceptSources: true` at install (`--accept-sources` on
+the CLI); the flag is recorded with a checksum of the section, so an
+upgrade that changes it re-asks and one that leaves it untouched carries
+the consent over — the `acceptMcpTools` / `acceptModalities` mold.
+Nothing is live until an operator creates a **connection** for an entry
+(`POST /v1/admin/source-connections` or Admin → Connections,
+`SOURCE_PLANE_ENABLED`); consent is the review of what MAY be connected.
+The Admin → Packs install flow asks for each gate in turn.
+
 ## First-party pack library (industries)
 
 Beyond the builtin `code_memory`, brain ships a library of DISTRIBUTABLE
@@ -705,6 +758,8 @@ tracking and scene graphs remain deliberately undeclared.
 | `fintech` | 0.3.0 | text, document | document text | deny | statements and KYC files; `image` withheld (biometric-adjacent), so no ocr |
 | `hr` | 0.3.0 | text, document | document text | deny | CVs and offer letters are personal data; `image` withheld, so no ocr |
 | `code_memory` (builtin) | 0.6.0 | text, image, document | image metadata, document text, **ocr** | deny | failure/dashboard screenshots + log artifacts; the text in a screenshot is the whole point of it |
+| `file_memory` | 0.4.0 | text, document, image | document text, image metadata | deny | a folder, bucket or cloud drive holds PDFs, office documents, mail and images next to its text; the source pack for `fs` (`folder` / `folder_media`), `s3` (`bucket` / `bucket_media`), `gdrive`, `onedrive` and `dropbox` (each `<kind>` / `<kind>_media`) connections — a folder can hold anything, so raw bytes never serve |
+| `web_memory` | 0.2.0 | text, document | document text | deny | a site serves PDFs and office documents next to its pages; the source pack for `url` connections (`site` / `site_media`) and for `mcp` ones (`mcp_resources` / `mcp_resources_media` — an MCP server the operator names); page images are chrome, not evidence |
 
 The `ocr` capability needs `EVIDENCE_OCR_ENABLED` on top of the usual
 ladder (`EVIDENCE_PROCESSOR_BROKER`, pack declaration, current modality
